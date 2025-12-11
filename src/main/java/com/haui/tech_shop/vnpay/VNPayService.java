@@ -130,7 +130,7 @@ public class VNPayService {
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        String totalAmount = String.valueOf(amount * 100);
+        String totalAmount = String.valueOf(amount) + "00";
         vnp_Params.put("vnp_Amount", totalAmount);
         vnp_Params.put("vnp_CurrCode", "VND");
 
