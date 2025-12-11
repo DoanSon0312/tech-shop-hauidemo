@@ -1,0 +1,188 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{cart.page_title}">TechShop || Your Cart</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+    <link rel="stylesheet"
+          th:href="@{/user/customize/css/main.css}"/>
+</head>
+
+<body class="sticky-header">
+<!-- Start Header -->
+<div th:insert="~{user/fragments/header::header}"></div>
+<!-- End Header -->
+
+<main class="main-wrapper">
+
+    <!-- Start Cart Area  -->
+    <div class="axil-product-cart-area axil-section-gap" id="cart-items-container">
+        <div class="container">
+            <div class="axil-product-cart-wrap">
+                <div class="product-table-heading">
+                    <h4 class="title" th:text="#{cart.title}">Your Cart</h4>
+                    <a th:href="@{/user/cart/delete-all}" class="cart-clear" th:text="#{cart.clear_cart}">Clear Shopping Cart</a>
+                </div>
+                <div class="product-table-heading">
+                    <div th:if="${error != null}">
+                        <h6 th:text="${error}"
+                            style="color: red;">
+                        </h6>
+                    </div>
+                </div>
+                <div class="table-responsive" >
+                    <input type="hidden" id="is-cart-empty" th:value="${isEmptyCart}">
+                    <form th:action="@{/user/checkout}" method="get" id="checkoutForm">
+                        <table class="table axil-product-table axil-cart-table mb--40">
+                            <thead>
+                            <tr>
+                                <th scope="col" class="product-checkbox"></th>
+                                <th scope="col" class="product-thumbnail" th:text="#{cart.thumbnail}">Thumbnail</th>
+                                <th scope="col" class="product-title" th:text="#{cart.product_name}">Product Name</th>
+                                <th scope="col" class="product-price" th:text="#{cart.price}">Price</th>
+                                <th scope="col" class="product-quantity" th:text="#{cart.quantity}">Quantity</th>
+                                <th scope="col" class="product-subtotal" th:text="#{cart.subtotal}">Subtotal</th>
+                                <th scope="col" class="product-remove"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cartDetail : ${cartDetailListFull}">
+                                <td class="product-checkbox">
+                                    <div class="checkbox-container">
+                                        <input type="checkbox"
+                                               th:id="'brand-' + ${cartDetail.productId}"
+                                               class="product-checkbox"
+                                               th:name="selectedProducts"
+                                               th:value="${cartDetail.productId}" />
+                                        <label th:for="'brand-' + ${cartDetail.productId}" class="checkbox-label"></label>
+                                    </div>
+                                </td>
+                                <td class="product-thumbnail">
+                                    <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                                        <img th:if="${cartDetail.isUrlImage()}"
+                                             th:src="${cartDetail.thumbnail}"
+                                             class="product-image"
+                                             th:alt="#{product.image_alt}">
+                                        <img th:unless="${cartDetail.isUrlImage()}"
+                                             th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                             class="product-image"
+                                             th:alt="#{product.image_alt}">
+                                    </a>
+                                </td>
+                                <td class="product-title"><a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                                             th:text="${cartDetail.productName}"></a></td>
+                                <td class="product-price" data-title="Price"><span th:text="${cartDetail.price}"></span></td>
+                                <td class="product-quantity" data-title="Qty">
+                                    <div class="pro-qty">
+                                        <a th:href="@{/user/cart/dec-cart(productId=${cartDetail.productId})}" class="dec qtybtn">-</a>
+                                        <input type="number" class="quantity-input" th:value="${cartDetail.quantity}" readonly>
+                                        <a th:href="@{/user/cart/inc-cart(productId=${cartDetail.productId})}" class="inc qtybtn">+</a>
+                                    </div>
+                                </td>
+                                <td class="product-subtotal" data-title="Price"><span th:text="${cartDetail.totalPriceString}"></span></td>
+                                <td class="product-remove"><a th:href="@{/user/cart/delete/{id}(id=${cartDetail.productId})}"
+                                                              class="remove-wishlist"><i class="fal fa-times"></i></a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="cart-update-btn-area">
+                            <div class="update-btn">
+                                <button type="submit" class="axil-btn btn-outline" th:text="#{cart.checkout_button}">Check out</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div>
+                    <h3 class="cart-subtotal mt-30" style="margin-top: 25px;">
+                        <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                        <span class="mb-20" th:text="${totalPriceOfCart.totalPrice}"></span>
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Cart Area  -->
+    <div id="cart-empty-message" style="display: none;">
+        <div class="empty-notification">
+            <img th:src="@{/user/assets/images/my-image/empty-cart-yellow.png}" th:alt="#{cart.empty_cart_alt}">
+            <p th:text="#{cart.empty_message}">Browse our catalog to add your favorite products to your cart!</p>
+            <a th:href="@{/user/home}" class="btn btn-primary" th:text="#{cart.continue_shopping}">Continue Shopping</a>
+        </div>
+    </div>
+</main>
+
+<div th:insert="~{/user/fragments/service-area-footer::service-area-footer}"></div>
+<!-- Start Footer Area  -->
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- Product Quick View Modal Start -->
+<div th:insert="~{/user/fragments/quickview::quick-view}"></div>
+<!-- Product Quick View Modal End -->
+
+<!-- Header Search Modal End -->
+<div th:insert="~{/user/fragments/header-search::header-search}"></div>
+<!-- Header Search Modal End -->
+
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                                  th:text="${cartDetail.productName}"></a></h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn d-flex justify-content-around align-items-center">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script>
+    $(document).ready(function (){
+        const isWishlistEmpty = $('#is-cart-empty').val() === 'true';
+        if (isWishlistEmpty){
+            $('#cart-items-container').hide();
+            $('#cart-empty-message').fadeIn();
+        }else{
+            $('#cart-items-container').show();
+        }
+    });
+</script>
+
+</body>
+</html>

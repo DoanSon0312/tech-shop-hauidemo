@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Deleted Products - NiceAdmin Bootstrap Template</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link th:href="@{/admin/assets/img/favicon.png}" rel="icon">
+  <link th:href="@{/admin/assets/img/apple-touch-icon.png}" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <link th:href="@{/admin/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/boxicons/css/boxicons.min.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/quill/quill.snow.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/quill/quill.bubble.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/remixicon/remixicon.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/simple-datatables/style.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/css/style.css}" rel="stylesheet">
+
+  <style>
+    .deleted-badge {
+      background-color: #dc3545;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .product-row-deleted {
+      opacity: 0.7;
+      background-color: #fff3f3;
+    }
+
+    .product-row-critical {
+      background-color: #ffe6e6;
+      border-left: 4px solid #dc3545;
+    }
+
+    .btn-restore {
+      background-color: #28a745;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-restore:hover {
+      background-color: #218838;
+      color: white;
+    }
+
+    .btn-back {
+      background-color: #6c757d;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-back:hover {
+      background-color: #5a6268;
+      color: white;
+    }
+
+    .days-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .days-critical {
+      background-color: #dc3545;
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .days-warning {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    .days-safe {
+      background-color: #17a2b8;
+      color: white;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .auto-delete-info {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .trigger-delete-btn {
+      background-color: #dc3545;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .trigger-delete-btn:hover {
+      background-color: #c82333;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Thêm header và sidebar -->
+<div th:replace="~{manager/fragments/header::manager-header}"></div>
+<div th:replace="~{manager/fragments/sidebar::manager-sidebar}"></div>
+
+<main id="main" class="main">
+
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <div class="pagetitle">
+      <h1>Deleted Products</h1>
+      <p>View and restore deleted products</p>
+    </div>
+
+    <div class="page-btn d-flex gap-2">
+      <button class="trigger-delete-btn" id="triggerAutoDelete">
+        <i class="bi bi-trash3"></i> Run Auto-Delete Now
+      </button>
+      <a th:href="@{/manager/products}" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Back to Products
+      </a>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+
+        <!-- Auto-delete info alert -->
+        <div class="auto-delete-info" th:if="${!#lists.isEmpty(products)}">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          <strong>Auto-Delete Policy:</strong> Products are automatically deleted permanently after 30 days of being marked as deleted.
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+
+            <!-- Alert nếu không có sản phẩm đã xóa -->
+            <div th:if="${#lists.isEmpty(products)}" class="alert alert-info mt-3" role="alert">
+              <i class="bi bi-info-circle me-2"></i>
+              No deleted products found. All products are active.
+            </div>
+
+            <!-- Table with stripped rows -->
+            <table th:if="${!#lists.isEmpty(products)}" class="table" id="deletedProductTable">
+              <thead>
+              <tr>
+                <th>Product name</th>
+                <th>Category</th>
+                <th>Brand</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Days Left</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="product : ${products}"
+                  th:data-product-id="${product.id}"
+                  th:classappend="${daysUntilDeletion.get(product.id) != null && daysUntilDeletion.get(product.id) <= 3} ? 'product-row-critical' : 'product-row-deleted'">
+                <td class="productimgname">
+                  <a href="javascript:void(0);" class="product-img">
+                    <img th:if="${product.thumbnail.startsWith('https')}"
+                         th:src="${product.thumbnail}"
+                         class="product-image"
+                         alt="Product image" style="width: 50px; height: 50px; object-fit: cover;">
+                    <img th:unless="${product.thumbnail.startsWith('https')}"
+                         th:src="@{'/uploads/' + ${product.thumbnail}}"
+                         class="product-image"
+                         alt="Product image" style="width: 50px; height: 50px; object-fit: cover;">
+                  </a>
+                  <span th:text="${product.getName()}"></span>
+                  <span class="badge bg-danger ms-2" style="font-size: 10px;">DELETED</span>
+                </td>
+                <td th:text="${product.getCategory().getName()}"></td>
+                <td th:text="${product.getBrand().getName()}"></td>
+                <td th:text="${'$' + product.getPrice()}"></td>
+                <td th:text="${product.getStockQuantity()}"></td>
+                <td>
+                  <span th:if="${daysUntilDeletion.get(product.id) != null}">
+                    <span th:if="${daysUntilDeletion.get(product.id) <= 3}"
+                          class="days-badge days-critical"
+                          th:text="${daysUntilDeletion.get(product.id) + ' days'}">
+                    </span>
+                    <span th:if="${daysUntilDeletion.get(product.id) > 3 && daysUntilDeletion.get(product.id) <= 10}"
+                          class="days-badge days-warning"
+                          th:text="${daysUntilDeletion.get(product.id) + ' days'}">
+                    </span>
+                    <span th:if="${daysUntilDeletion.get(product.id) > 10}"
+                          class="days-badge days-safe"
+                          th:text="${daysUntilDeletion.get(product.id) + ' days'}">
+                    </span>
+                  </span>
+                  <span th:unless="${daysUntilDeletion.get(product.id) != null}" class="text-muted">
+                    N/A
+                  </span>
+                </td>
+                <td>
+                  <a class="me-3"
+                     th:href="@{/manager/products/productDetail(id=${product.getId()})}">
+                    <img th:src="@{/admin/assets/img/icons/eye.svg}" alt="view" title="View Details">
+                  </a>
+                  <button class="btn-restore confirm-text-restore" title="Restore Product">
+                    <i class="bi bi-arrow-clockwise"></i> Restore
+                  </button>
+                  <a class="ms-2 confirm-text-permanent-delete" style="cursor: pointer;" title="Delete Permanently">
+                    <img th:src="@{/admin/assets/img/icons/delete.svg}" alt="delete permanently">
+                  </a>
+                </td>
+              </tr>
+
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="footer" class="footer">
+  <div class="copyright">
+    &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+  </div>
+  <div class="credits">
+    Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+  </div>
+</footer>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Vendor JS Files -->
+<script th:src="@{/admin/assets/vendor/apexcharts/apexcharts.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/chart.js/chart.umd.js}"></script>
+<script th:src="@{/admin/assets/vendor/echarts/echarts.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/quill/quill.js}"></script>
+<script th:src="@{/admin/assets/vendor/simple-datatables/simple-datatables.js}"></script>
+<script th:src="@{/admin/assets/vendor/tinymce/tinymce.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/admin/assets/js/main.js}"></script>
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/jquery-3.6.0.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/sweetalert2@11.js}"></script>
+
+<script>
+  $(document).ready(function () {
+
+      // Initialize DataTable
+      if (typeof simpleDatatables !== 'undefined' && document.getElementById('deletedProductTable')) {
+        try {
+          const dataTable = new simpleDatatables.DataTable("#deletedProductTable", {
+            searchable: true,
+            fixedHeight: false,
+            perPage: 10
+          });
+        } catch (error) {
+          console.log('DataTable initialization skipped:', error);
+        }
+      }
+
+      // XỬ LÝ TRIGGER AUTO-DELETE
+      $("#triggerAutoDelete").on("click", function (e) {
+          e.preventDefault();
+
+          Swal.fire({
+              title: "Run Auto-Delete Now?",
+              text: "This will permanently delete all products marked as deleted 30+ days ago.",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#dc3545",
+              cancelButtonColor: "#6c757d",
+              confirmButtonText: "Yes, run it!",
+              cancelButtonText: "Cancel",
+              customClass: {
+                  confirmButton: 'btn btn-danger',
+                  cancelButton: 'btn btn-secondary ml-1'
+              },
+              buttonsStyling: false
+          }).then(function (result) {
+              if (result.isConfirmed) {
+                  $.ajax({
+                      url: `/manager/products/auto-delete-now`,
+                      method: "GET",
+                      success: function (response) {
+                          if (response.status === "success") {
+                              Swal.fire({
+                                  icon: "success",
+                                  title: "Auto-Delete Completed!",
+                                  html: `<p>${response.message}</p><p><strong>${response.deletedCount}</strong> products were permanently deleted.</p>`,
+                                  customClass: {
+                                      confirmButton: 'btn btn-success'
+                                  },
+                                  buttonsStyling: false
+                              }).then(() => {
+                                  window.location.reload();
+                              });
+                          }
+                      },
+                      error: function (xhr, status, error) {
+                          Swal.fire({
+                              icon: "error",
+                              title: "Error!",
+                              text: "Failed to run auto-delete.",
+                              customClass: {
+                                  confirmButton: 'btn btn-danger'
+                              },
+                              buttonsStyling: false
+                          });
+                      }
+                  });
+              }
+          });
+      });
+
+      // XỬ LÝ RESTORE PRODUCT
+      $(document).on("click", ".confirm-text-restore", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          var productId = $(this).closest("tr").data("product-id");
+
+          Swal.fire({
+              title: "Restore Product?",
+              text: "This product will be activated again.",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#6c757d",
+              confirmButtonText: "Yes, restore it!",
+              cancelButtonText: "Cancel",
+              customClass: {
+                  confirmButton: 'btn btn-success',
+                  cancelButton: 'btn btn-secondary ml-1'
+              },
+              buttonsStyling: false
+          }).then(function (result) {
+              if (result.isConfirmed) {
+                  $.ajax({
+                      url: `/manager/products/restore/${productId}`,
+                      method: "GET",
+                      success: function (response) {
+                          if (response.status === "success") {
+                              Swal.fire({
+                                  icon: "success",
+                                  title: "Restored!",
+                                  text: response.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-success'
+                                  },
+                                  buttonsStyling: false
+                              }).then(() => {
+                                  window.location.reload();
+                              });
+                          } else {
+                              Swal.fire({
+                                  icon: "error",
+                                  title: "Error!",
+                                  text: response.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-danger'
+                                  },
+                                  buttonsStyling: false
+                              });
+                          }
+                      },
+                      error: function (xhr, status, error) {
+                          let errorMessage = "Failed to restore product.";
+                          try {
+                              const errorResponse = JSON.parse(xhr.responseText);
+                              if (errorResponse.message) {
+                                  errorMessage = errorResponse.message;
+                              }
+                          } catch (e) {}
+
+                          Swal.fire({
+                              icon: "error",
+                              title: "Error!",
+                              text: errorMessage,
+                              customClass: {
+                                  confirmButton: 'btn btn-danger'
+                              },
+                              buttonsStyling: false
+                          });
+                      }
+                  });
+              }
+          });
+      });
+
+      // XỬ LÝ XÓA VĨNH VIỄN
+      $(document).on("click", ".confirm-text-permanent-delete", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          var productId = $(this).closest("tr").data("product-id");
+
+          Swal.fire({
+              title: "Permanently Delete?",
+              text: "This action cannot be undone! All data will be lost forever.",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#dc3545",
+              cancelButtonColor: "#6c757d",
+              confirmButtonText: "Yes, delete permanently!",
+              cancelButtonText: "Cancel",
+              customClass: {
+                  confirmButton: 'btn btn-danger',
+                  cancelButton: 'btn btn-secondary ml-1'
+              },
+              buttonsStyling: false
+          }).then(function (result) {
+              if (result.isConfirmed) {
+                  $.ajax({
+                      url: `/manager/products/permanent-delete/${productId}`,
+                      method: "GET",
+                      success: function (response) {
+                          if (response.status === "success") {
+                              Swal.fire({
+                                  icon: "success",
+                                  title: "Permanently Deleted!",
+                                  text: response.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-success'
+                                  },
+                                  buttonsStyling: false
+                              }).then(() => {
+                                  window.location.reload();
+                              });
+                          } else {
+                              Swal.fire({
+                                  icon: "error",
+                                  title: "Error!",
+                                  text: response.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-danger'
+                                  },
+                                  buttonsStyling: false
+                              });
+                          }
+                      },
+                      error: function (xhr, status, error) {
+                          let errorMessage = "Failed to permanently delete product.";
+                          try {
+                              const errorResponse = JSON.parse(xhr.responseText);
+                              if (errorResponse.message) {
+                                  errorMessage = errorResponse.message;
+                              }
+                          } catch (e) {}
+
+                          Swal.fire({
+                              icon: "error",
+                              title: "Error!",
+                              text: errorMessage,
+                              customClass: {
+                                  confirmButton: 'btn btn-danger'
+                              },
+                              buttonsStyling: false
+                          });
+                      }
+                  });
+              }
+          });
+      });
+  });
+</script>
+
+</body>
+
+</html>

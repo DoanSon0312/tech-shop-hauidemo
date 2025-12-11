@@ -1,0 +1,64 @@
+<div class="iq-sidebar  sidebar-default " th:fragment="sidebar">
+    <div class="iq-sidebar-logo d-flex align-items-center justify-content-between">
+        <a th:href="@{/shipper/dashboard}" class="header-logo">
+            <img th:src="@{/shipper/images/logo.png}" class="img-fluid rounded-normal light-logo" alt="logo"><h5 class="logo-title light-logo ml-3">POSDash</h5>
+        </a>
+        <div class="iq-menu-bt-sidebar ml-0">
+            <i class="las la-bars wrapper-menu"></i>
+        </div>
+    </div>
+    <div class="data-scrollbar" data-scroll="1">
+        <nav class="iq-sidebar-menu">
+            <ul id="iq-sidebar-toggle" class="iq-menu">
+                <li class="active">
+                    <a th:href="@{/shipper/dashboard}" class="svg-icon">
+                        <svg  class="svg-icon" id="p-dash1" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <span class="ml-4">Dashboards</span>
+                    </a>
+                </li>
+                <li class=" ">
+                    <a th:href="@{/shipper/shipping}" class="svg-icon">
+                        <svg class="svg-icon" id="p-dash2" width="20" height="20"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <span class="ml-4">Order Manager</span>
+                    </a>
+                </li>
+                <li class=" ">
+                    <a th:href="@{/shipper/summary}" class="svg-icon">
+                        <svg class="svg-icon" id="p-dash4" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                        </svg>
+                        <span class="ml-4">Summary</span>
+                    </a>
+                </li>
+                <li class=" ">
+                    <a th:href="@{/shipper/shipper-info}" class="svg-icon">
+                        <svg class="svg-icon" id="p-dash8" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="ml-4">User profile</span>
+                    </a>
+                </li>
+                <li class="inactive">
+                    <a th:href="@{/user/home}"><img th:src="@{/admin/assets/img/icons/users1.svg}" width="20" height="20" alt="img"><span class="ml-4">
+                                    User Home</span> </a>
+                </li>
+            </ul>
+        </nav>
+        <div id="sidebar-bottom" class="position-relative sidebar-bottom">
+            <div class="card border-none">
+                <div class="card-body p-0">
+                    <div class="sidebarbottom-content">
+                        <div class="image"><img th:src="@{/shipper/images/layouts/side-bkg.png}" class="img-fluid" alt="side-bkg"></div>
+                        <h6 class="mt-4 px-4 body-title"></h6>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-3"></div>
+    </div>
+</div>      

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Dashboard - NiceAdmin Bootstrap Template</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+    <!-- Favicons -->
+    <link th:href="@{/admin/assets/img/favicon.png}" rel="icon">
+    <link th:href="@{/admin/assets/img/apple-touch-icon.png}" rel="apple-touch-icon">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <link th:href="@{/admin/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/boxicons/css/boxicons.min.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/quill/quill.snow.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/quill/quill.bubble.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/remixicon/remixicon.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/simple-datatables/style.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/css/style.css}" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div th:replace="~{admin/fragments/header::admin-header}"></div>
+<div th:replace="~{admin/fragments/sidebar::admin-sidebar}"></div>
+
+<main id="main" class="main">
+
+    <div class="page-header d-flex justify-content-between">
+        <div class="pagetitle">
+            <h1>Product Brand list</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active">View</li>
+                    <li class="breadcrumb-item active">Search product Brand</li>
+                </ol>
+            </nav>
+        </div><!-- End Page Title -->
+
+        <div class="page-btn">
+            <a th:href="@{/admin/brands/add-brand}" class="btn-added">
+                <img th:src="@{/admin/assets/img/icons/plus.svg}" class="me-1" alt="img">Add Brand
+            </a>
+        </div><!-- End Page-btn-->
+    </div>
+
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <!-- Table with stripped rows -->
+                        <table class="table" id="brandTable">
+                            <thead>
+                            <tr>
+                                <th>Brand name</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="brand: ${brands}" th:data-brand-id="${brand.id}">
+                                <td class="productimgname">
+                                    <a class="product-img">
+                                        <img th:if="${brand.brandImg.startsWith('https')}"
+                                             th:src="${brand.brandImg}"
+                                             class="product-image"
+                                             alt="Brand Image">
+                                        <img th:unless="${brand.brandImg.startsWith('https')}"
+                                             th:src="@{'/uploads/' + ${brand.brandImg}}"
+                                             class="product-image"
+                                             alt="Brand Image">
+                                    </a>
+                                    <a th:text="${brand.name}"></a>
+                                </td>
+                                <td>
+                                    <a class="me-3" th:href="@{/admin/brands/edit-brand/{id}(id=${brand.id})}">
+                                        <img th:src="@{/admin/assets/img/icons/edit.svg}" alt="img">
+                                    </a>
+                                    <a class="me-3 confirm-text-delete">
+                                        <img th:src="@{/admin/assets/img/icons/delete.svg}" alt="img">
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <!-- End Table with stripped rows -->
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main><!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<footer id="footer" class="footer">
+    <div class="copyright">
+        &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+    </div>
+    <div class="credits">
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+    </div>
+</footer><!-- End Footer -->
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Vendor JS Files -->
+<script th:src="@{/admin/assets/vendor/apexcharts/apexcharts.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/chart.js/chart.umd.js}"></script>
+<script th:src="@{/admin/assets/vendor/echarts/echarts.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/quill/quill.js}"></script>
+<script th:src="@{/admin/assets/vendor/simple-datatables/simple-datatables.js}"></script>
+<script th:src="@{/admin/assets/vendor/tinymce/tinymce.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/php-email-form/validate.js}"></script>
+
+<!-- Template Main JS File -->
+<script th:src="@{/admin/assets/js/main.js}"></script>
+
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/jquery-3.6.0.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/sweetalert2@11.js}"></script>
+
+<script>
+    $(document).ready(function () {
+        // Khởi tạo DataTable với cấu hình tùy chỉnh để tránh lỗi
+        if (typeof simpleDatatables !== 'undefined' && document.getElementById('brandTable')) {
+            try {
+                const dataTable = new simpleDatatables.DataTable("#brandTable", {
+                    searchable: true,
+                    fixedHeight: false,
+                    perPage: 10,
+                    columns: [
+                        {
+                            select: 1,
+                            sortable: false
+                        }
+                    ]
+                });
+            } catch (error) {
+                console.log('DataTable initialization skipped:', error);
+            }
+        }
+
+        // Xử lý delete brand
+        $(".confirm-text-delete").on("click", function () {
+            var brandId = $(this).closest("tr").data("brand-id");
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!",
+                confirmButtonClass: "btn btn-primary",
+                cancelButtonClass: "btn btn-danger ml-1",
+                buttonsStyling: false
+            }).then(function (t) {
+                if(t.value){
+                    $.ajax({
+                        url: `/admin/brands/delete-brand/${brandId}`,
+                        method: "GET",
+                        success: function (response) {
+                            if (response.status === "success") {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Deleted!",
+                                    text: response.message,
+                                    confirmButtonClass: "btn btn-success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Error!",
+                                    text: response.message,
+                                    confirmButtonClass: "btn btn-danger"
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error!",
+                                text: "Failed to delete the brand.",
+                                confirmButtonClass: "btn btn-danger"
+                            })
+                        }
+                    });
+                }
+            });
+        })
+    });
+</script>
+
+</body>
+
+</html>

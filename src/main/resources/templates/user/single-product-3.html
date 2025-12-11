@@ -1,0 +1,970 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title th:text="#{product.page_title}">TechShop || Product Details</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+    <link rel="stylesheet" th:href="@{/user/customize/css/main.css}"/>
+</head>
+
+<body class="sticky-header overflow-md-visible">
+<a href="#top" class="back-to-top" id="backto-top"><i class="fal fa-arrow-up"></i></a>
+<div th:insert="~{user/fragments/header::header}"></div>
+
+<main class="main-wrapper">
+    <div class="axil-single-product-area bg-color-white">
+        <div class="single-product-thumb axil-section-gapcommon single-product-modern">
+            <div class="container">
+                <div class="row row--20">
+                    <!-- ==================== PHẦN ẢNH SẢN PHẨM MỚI ==================== -->
+                    <div class="col-lg-6 mb--40">
+                        <div class="product-gallery-container">
+                            <!-- Main Image with Slider -->
+                            <div class="main-image-container" id="mainImageContainer">
+                                <button class="nav-arrow prev" onclick="prevSlide()">❮</button>
+                                <div class="main-image-wrapper" id="mainImageWrapper">
+                                    <!-- Ảnh thumbnail chính -->
+                                    <div class="main-image-slide">
+                                        <img th:if="${productRes.isUrlImage()}"
+                                             th:src="${product.thumbnail}"
+                                             th:alt="#{product.image_alt}">
+                                        <img th:unless="${productRes.isUrlImage()}"
+                                             th:src="@{'/uploads/' + ${product.thumbnail}}"
+                                             th:alt="#{product.image_alt}">
+                                    </div>
+                                    <!-- Các ảnh sản phẩm khác -->
+                                    <div class="main-image-slide" th:each="productImage : ${productImages}">
+                                        <img th:if="${productImage.getUrl().startsWith('https')}"
+                                             th:src="${productImage.getUrl()}"
+                                             th:alt="#{product.image_alt}">
+                                        <img th:unless="${productImage.getUrl().startsWith('https')}"
+                                             th:src="@{'/uploads/' + ${productImage.getUrl()}}"
+                                             th:alt="#{product.image_alt}">
+                                    </div>
+                                </div>
+                                <button class="nav-arrow next" onclick="nextSlide()">❯</button>
+                            </div>
+                            <!-- Slide Indicators -->
+                            <div class="slide-indicators" id="indicators"></div>
+
+                            <!-- Thumbnail Images -->
+                            <div class="thumbnail-container" id="thumbnailContainer">
+                                <!-- Thumbnail chính -->
+                                <div class="thumbnail-item active" onclick="goToSlide(0)">
+                                    <img th:if="${productRes.isUrlImage()}"
+                                         th:src="${product.thumbnail}"
+                                         th:alt="#{product.image_alt}">
+                                    <img th:unless="${productRes.isUrlImage()}"
+                                         th:src="@{'/uploads/' + ${product.thumbnail}}"
+                                         th:alt="#{product.image_alt}">
+                                </div>
+                                <!-- Các thumbnail khác -->
+                                <div class="thumbnail-item"
+                                     th:each="productImage, iterStat : ${productImages}"
+                                     th:onclick="'goToSlide(' + (${iterStat.index} + 1) + ')'">
+                                    <img th:if="${productImage.getUrl().startsWith('https')}"
+                                         th:src="${productImage.getUrl()}"
+                                         th:alt="#{product.image_alt}">
+                                    <img th:unless="${productImage.getUrl().startsWith('https')}"
+                                         th:src="@{'/uploads/' + ${productImage.getUrl()}}"
+                                         th:alt="#{product.image_alt}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ==================== KẾT THÚC PHẦN ẢNH ==================== -->
+
+                    <div class="col-lg-6 mb--40">
+                        <div class="single-product-content">
+                            <div class="inner">
+                                <h2 class="product-title" th:text="${product.getName()}"></h2>
+                                <span class="price-amount" th:text="${productRes.getPrice()}"></span>
+                                <div class="product-rating">
+                                    <div class="star-rating">
+                                        <th:block th:with="ratingCount=${ratingCount}">
+                                            <th:block th:if="${ratingCount > 0}">
+                                                <th:block th:each="i : ${#numbers.sequence(1, ratingCount)}">
+                                                    <i class="fas fa-star"></i>
+                                                </th:block>
+                                            </th:block>
+                                            <th:block th:if="${ratingCount < 5}">
+                                                <th:block th:each="i : ${#numbers.sequence(1, (5 - ratingCount))}">
+                                                    <i class="far fa-star"></i>
+                                                </th:block>
+                                            </th:block>
+                                        </th:block>
+                                    </div>
+                                    <div class="review-link">
+                                        <a href="#">(<span th:text="${ratingUser}"></span> <span th:text="#{product.customer_reviews}">customer reviews</span>)</a>
+                                    </div>
+                                </div>
+                                <ul class="product-meta">
+                                    <li th:if="${product.getStockQuantity() > 0}"><i class="fal fa-check"></i><span th:text="#{product.in_stock}">In stock</span></li>
+                                    <li><i class="fal fa-check"></i><span th:text="#{product.free_delivery}">Free delivery available</span></li>
+                                </ul>
+
+                                <div class="product-variations-wrapper">
+                                    <div class="product-variation product-size-variation"
+                                         th:if="${product.getCategory().getName() == 'Computer' or product.getCategory().getName() == 'Phone'}">
+                                        <h6 class="title" th:text="#{product.ram_type}">RAM Type:</h6>
+                                        <ul class="radius">
+                                            <li th:text="${product.getRam()}"></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="product-action-wrapper d-flex-center">
+                                    <div class="pro-qty"><input style="width: 60px;" type="text" th:value="${product.getStockQuantity()}"></div>
+                                    <ul class="product-action d-flex-center mb--0">
+                                        <li class="add-to-cart">
+                                            <form th:action="@{/user/cart/cart-add}" method="post" class="cart-action">
+                                                <input type="hidden" name="productId" th:value="${product.id}"/>
+                                                <input type="hidden" name="quantity" value="1"/>
+                                                <li class="select-option">
+                                                    <button type="submit" class="add-to-cart-btn" th:text="#{products.add_to_cart}">Add to cart</button>
+                                                </li>
+                                            </form>
+                                        </li>
+                                        <li class="wishlist" th:attr="data-product-id=${product.id}">
+                                            <form th:action="@{/user/wishlist/insert}" method="post" class="wishlist-form">
+                                                <input type="hidden" name="wishlistId" th:value="${session.wishlistId}">
+                                                <input type="hidden" name="productId" th:value="${product.id}">
+                                                <button type="submit" class="wishlist-btn"
+                                                        th:classappend="${wishedProductIds.contains(product.id) ? 'active' : ''}">
+                                                    <i th:class="${wishedProductIds.contains(product.id) ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="woocommerce-tabs wc-tabs-wrapper bg-vista-white">
+            <div class="container">
+                <ul class="nav tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="active" id="description-tab" data-bs-toggle="tab" href="#description" role="tab"
+                           aria-controls="description" aria-selected="true" th:text="#{product.description}">Description</a>
+                    </li>
+                    <li class="nav-item " role="presentation">
+                        <a id="additional-info-tab" data-bs-toggle="tab" href="#additional-info" role="tab"
+                           aria-controls="additional-info" aria-selected="false" th:text="#{product.additional_info}">Additional Information</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a id="reviews-tab" data-bs-toggle="tab" href="#reviews" role="tab" aria-controls="reviews"
+                           aria-selected="false" th:text="#{product.reviews}">Reviews</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a id="installment-tab" data-bs-toggle="tab" href="#installment" role="tab"
+                           aria-controls="installment" aria-selected="false" th:text="#{product.installment}">Installment</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                        <div class="product-desc-wrapper">
+                            <div class="row">
+                                <div class="col-lg-6 mb--30">
+                                    <div class="single-desc">
+                                        <h5 class="title" th:text="#{product.specifications}">Specifications:</h5>
+                                        <p th:text="${product.getDescription()}"></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb--30">
+                                    <div class="single-desc">
+                                        <h5 class="title" th:text="#{product.care_maintenance}">Care & Maintenance:</h5>
+                                        <p th:text="${product.getWarranty()}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <ul class="pro-des-features">
+                                        <li class="single-features">
+                                            <div class="icon">
+                                                <img th:src="@{/user/assets/images/product/product-thumb/icon-3.png}"
+                                                     th:alt="#{product.easy_returns}">
+                                            </div>
+                                            <span th:text="#{product.easy_returns}">Easy Returns</span>
+                                        </li>
+                                        <li class="single-features">
+                                            <div class="icon">
+                                                <img th:src="@{/user/assets/images/product/product-thumb/icon-2.png}"
+                                                     th:alt="#{product.quality_service}">
+                                            </div>
+                                            <span th:text="#{product.quality_service}">Quality Service</span>
+                                        </li>
+                                        <li class="single-features">
+                                            <div class="icon">
+                                                <img th:src="@{/user/assets/images/product/product-thumb/icon-1.png}"
+                                                     th:alt="#{product.original_product}">
+                                            </div>
+                                            <span th:text="#{product.original_product}">Original Product</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="additional-info" role="tabpanel" aria-labelledby="additional-info-tab">
+                        <div class="product-additional-info">
+                            <div class="table-responsive">
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <th th:text="#{product.brand}">Brand</th>
+                                        <td th:text="${product.getBrand().getName()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getCpu() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.cpu}">CPU</th>
+                                        <td th:text="${product.getCpu()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getRam() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.ram}">RAM</th>
+                                        <td th:text="${product.getRam()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getOs() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.os}">OS</th>
+                                        <td th:text="${product.getOs()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getMonitor() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.monitor}">Monitor</th>
+                                        <td th:text="${product.getMonitor()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getWeight() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.weight}">Weight</th>
+                                        <td th:text="${product.getWeight()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getBattery() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.battery}">Battery</th>
+                                        <td th:text="${product.getBattery()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getGraphicCard() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.graphic_card}">Graphic Card</th>
+                                        <td th:text="${product.getGraphicCard()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getPort() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.port}">Port</th>
+                                        <td th:text="${product.getPort()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getRearCamera() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.rear_camera}">Rear Camera</th>
+                                        <td th:text="${product.getRearCamera()}"></td>
+                                    </tr>
+                                    <tr th:attr="hidden=${product.getFrontCamera() == '' ? 'hidden' : null}">
+                                        <th th:text="#{product.front_camera}">Front Camera</th>
+                                        <td th:text="${product.getFrontCamera()}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <div class="reviews-wrapper">
+                            <div class="row">
+                                <div class="col-lg-6 mb--40">
+                                    <div class="axil-comment-area pro-desc-commnet-area">
+                                        <h5 class="title" th:text="${ratingUser} + ' ' + #{product.review_for_product}">Review for this product</h5>
+                                        <ul class="comment-list">
+                                            <li class="comment" th:each="rating : ${ratings}">
+                                                <div class="comment-body">
+                                                    <div class="single-comment">
+                                                        <div class="comment-img">
+                                                            <img th:src="@{'/uploads/'+${rating.getUser().getImage()}}"
+                                                                 style="height: 50px; width: 50px"
+                                                                 th:alt="#{product.author_image}">
+                                                        </div>
+                                                        <div class="comment-inner">
+                                                            <h6 class="commenter">
+                                                                <a class="hover-flip-item-wrapper" href="#">
+                                                                    <span class="hover-flip-item">
+                                                                        <span th:text="${rating.getUser().getLastName()}"></span>
+                                                                    </span>
+                                                                </a>
+                                                                <span class="commenter-rating ratiing-four-star">
+                                                                    <th:block th:with="star=${rating.getStar()}">
+                                                                        <th:block th:if="${star > 0}">
+                                                                            <th:block th:each="i : ${#numbers.sequence(1, star)}">
+                                                                                <i class="fas fa-star"></i>
+                                                                            </th:block>
+                                                                        </th:block>
+                                                                        <th:block th:if="${star < 5}">
+                                                                            <th:block th:each="i : ${#numbers.sequence(1, (5 - star))}">
+                                                                                <i class="far fa-star"></i>
+                                                                            </th:block>
+                                                                        </th:block>
+                                                                    </th:block>
+                                                                </span>
+                                                            </h6>
+                                                            <div class="comment-text">
+                                                                <p th:text="${rating.getContent()}"></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="installment" role="tabpanel" aria-labelledby="installment-tab">
+                        <div class="installment-wrapper">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <h4 class="mb-3" th:text="#{installment.calculator}">Installment Calculator</h4>
+                                    <div class="installment-calculator mb-4">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="financePartner" class="form-label" th:text="#{installment.financial_partner}">Financial Partner:</label>
+                                                <select class="form-select" style="font-size: 15px;" id="financePartner" onchange="calculateInstallment()">
+                                                    <option value="" th:text="#{installment.select_partner}">-- Select Partner --</option>
+                                                    <option th:each="partner : ${financePartners}"
+                                                            th:value="${partner.id}"
+                                                            th:text="${partner.name}"></option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="installmentPlan" class="form-label" th:text="#{installment.installment_term}">Installment Term:</label>
+                                                <select class="form-select" style="font-size: 15px;" id="installmentPlan" onchange="calculateInstallment()">
+                                                    <option value="" th:text="#{installment.select_term}">-- Select Term --</option>
+                                                    <option th:each="plan : ${installmentPlans}"
+                                                            th:value="${plan.id}"
+                                                            th:data-months="${plan.months}"
+                                                            th:data-interest="${plan.interestRate}"
+                                                            th:data-prepay="${plan.prepayPercent}"
+                                                            th:text="${'#' + plan.months + ' months - ' + plan.interestRate + '%'}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label for="productPrice" class="form-label" th:text="#{installment.product_price}">Product Price:</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">₫</span>
+                                                    <input type="text" class="form-control" id="productPrice"
+                                                           th:value="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{installment.down_payment}">Down Payment:</label>
+                                                <div id="prepayAmount" class="fw-bold text-primary">0 ₫</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{installment.total_installment_amount}">Total Installment Amount:</label>
+                                                <div id="totalInstallmentAmount" class="fw-bold text-primary">0 ₫</div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label" th:text="#{installment.monthly_payment}">Monthly Payment:</label>
+                                                <div id="monthlyPayment" class="fw-bold text-success fs-5">0 ₫</div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <button style="padding: 20px;font-size: 16px;" type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                        data-bs-target="#installmentRequestModal" id="requestInstallmentBtn" disabled
+                                                        th:text="#{installment.register_installment}">
+                                                    Register for Installment
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="productId" th:value="${product.id}">
+                                    <div class="finance-partners">
+                                        <h5 class="mb-3" th:text="#{installment.financial_partners}">Our Financial Partners</h5>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3" th:each="partner : ${financePartners}">
+                                                <div class="card h-100">
+                                                    <div class="card-body text-center">
+                                                        <h6 th:text="${partner.name}" class="card-title"></h6>
+                                                        <p class="card-text small" th:text="${partner.description}"></p>
+                                                        <p class="text-muted small" th:text="#{installment.interest_rate_from} + ': ' + ${partner.defaultInterestRate} + '%'">Interest rate from: </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="installmentRequestModal" tabindex="-1" aria-labelledby="installmentRequestModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="installmentRequestModalLabel" th:text="#{installment.registration}">Installment Registration</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="installmentRequestForm" th:action="@{/user/installment/request}" method="post">
+                                        <input type="hidden" name="productId" th:value="${product.id}">
+                                        <input type="hidden" id="selectedPlanId" name="planId" value="">
+                                        <input type="hidden" id="selectedFinancePartnerId" name="financePartnerId" value="">
+                                        <input type="hidden" id="orderId" name="orderId" value="">
+                                        <input type="hidden" id="userId" name="userId" value="">
+                                        <input type="hidden" id="loanAmount" name="loanAmount" value="">
+                                        <input type="hidden" id="totalInterest" name="totalInterest" value="">
+                                        <input type="hidden" id="monthlyPaymentValue" name="monthlyPayment" value="">
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{installment.product}">Product:</label>
+                                                <div class="fw-bold" th:text="${product.name}"></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{installment.product_price}">Product Price:</label>
+                                                <div class="fw-bold" th:text="${productRes.getPrice()}"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{installment.term}">Term:</label>
+                                                <div id="selectedPlanInfo" class="fw-bold"></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{installment.monthly_payment}">Monthly Payment:</label>
+                                                <div id="selectedMonthlyPayment" class="fw-bold text-success"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="fullName" class="form-label" th:text="#{installment.full_name} + ' *'">Full Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="fullName" name="fullName" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="phone" class="form-label" th:text="#{installment.phone_number} + ' *'">Phone Number <span class="text-danger">*</span></label>
+                                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="email" class="form-label" th:text="#{installment.email} + ' *'">Email <span class="text-danger">*</span></label>
+                                                <input type="email" class="form-control" id="email" name="email" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="idNumber" class="form-label" th:text="#{installment.id_passport} + ' *'">ID/Passport Number <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="idNumber" name="idNumber" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label for="address" class="form-label" th:text="#{installment.address} + ' *'">Address <span class="text-danger">*</span></label>
+                                                <textarea style="font-size: 15px;" class="form-control" id="address" name="address" rows="2" required></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label" th:text="#{installment.upload_documents} + ' *'">Upload Documents (max 3 files) <span class="text-danger">*</span></label>
+                                                <input type="file" class="form-control" id="documents" name="documents" multiple accept=".jpg,.jpeg,.png,.pdf" required>
+                                                <div class="form-text" th:text="#{installment.upload_hint}">Front and back of ID/Passport and any other relevant documents</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                            <label class="form-check-label" for="agreeTerms">
+                                                <span th:text="#{installment.agree_terms}">I agree to the</span> <a href="#"><span th:text="#{installment.terms_conditions}">terms and conditions</span></a> <span th:text="#{installment.of_installment}">of installment payment</span>
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" style="padding: 10px;font-size: 19px;" data-bs-dismiss="modal" th:text="#{common.cancel}">Cancel</button>
+                                    <button type="button" class="btn btn-primary" style="padding: 10px;font-size: 19px;" onclick="submitInstallmentRequest()" th:text="#{installment.submit_request}">Submit Request</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="quick-view-modal" tabindex="-1" aria-labelledby="quick-view-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quick-view-modal-label" th:text="#{modal.product_details}">Product Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="product-details">
+                        <p><strong th:text="#{modal.product_name}">Product Name:</strong> <span id="product-name"></span></p>
+                        <p><strong th:text="#{modal.price}">Price:</strong> <span id="product-price"></span></p>
+                        <p><strong th:text="#{modal.old_price}">Old Price:</strong> <span id="product-old-price"></span></p>
+                        <p><strong th:text="#{modal.details}">Details:</strong> <span id="product-description"></span></p>
+                        <p><strong th:text="#{modal.ratings}">Ratings:</strong> <span id="product-feedback"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{common.close}">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:insert="~{/user/fragments/service-area::service-area}"></div>
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<div th:insert="~{/user/fragments/quickview::quick-view}"></div>
+<div th:insert="~{/user/fragments/header-search::header-search}"></div>
+
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><a
+                                th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                th:text="${cartDetail.productName}"></a></h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span
+                                th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+                <a th:href="@{/user/checkout}" class="axil-btn btn-bg-secondary checkout-btn" th:text="#{cart.checkout}">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script>
+    // ==================== PRODUCT IMAGE SLIDER SCRIPT ====================
+    let currentSlide = 0;
+    let autoPlayInterval;
+    let countdownInterval;
+    let isPlaying = true;
+    let countdown = 5;
+    const slides = document.querySelectorAll('.main-image-slide');
+    const totalSlides = slides.length;
+
+    function initIndicators() {
+        const indicatorsContainer = document.getElementById('indicators');
+        indicatorsContainer.innerHTML = '';
+        for (let i = 0; i < totalSlides; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator' + (i === 0 ? ' active' : '');
+            indicator.onclick = () => goToSlide(i);
+            indicatorsContainer.appendChild(indicator);
+        }
+    }
+
+    function updateSlide() {
+        const wrapper = document.getElementById('mainImageWrapper');
+        wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+        document.querySelectorAll('.thumbnail-item').forEach((thumb, index) => {
+            thumb.classList.toggle('active', index === currentSlide);
+        });
+
+        document.querySelectorAll('.indicator').forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentSlide);
+        });
+    }
+
+    function goToSlide(index) {
+        currentSlide = index;
+        updateSlide();
+        resetCountdown();
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateSlide();
+        resetCountdown();
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateSlide();
+        resetCountdown();
+    }
+
+    function resetCountdown() {
+        countdown = 5;
+        const countdownEl = document.getElementById('countdown');
+        if (countdownEl) countdownEl.textContent = countdown;
+    }
+    function startCountdown() {
+        countdownInterval = setInterval(() => {
+            countdown--;
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) countdownEl.textContent = countdown;
+            if (countdown <= 0) {
+                countdown = 5;
+            }
+        }, 1000);
+    }
+
+    function startAutoPlay() {
+        autoPlayInterval = setInterval(nextSlide, 5000);
+        startCountdown();
+    }
+
+    const mainContainer = document.getElementById('mainImageContainer');
+    if (mainContainer) {
+        mainContainer.addEventListener('mouseenter', () => {
+            if (isPlaying) {
+                clearInterval(autoPlayInterval);
+                clearInterval(countdownInterval);
+            }
+        });
+
+        mainContainer.addEventListener('mouseleave', () => {
+            if (isPlaying) {
+                startAutoPlay();
+            }
+        });
+    }
+
+    // Initialize slider
+    if (slides.length > 0) {
+        initIndicators();
+        startAutoPlay();
+    }
+
+    // ==================== INSTALLMENT CALCULATOR ====================
+    function calculateInstallment() {
+        const financePartnerId = document.getElementById('financePartner').value;
+        const planId = document.getElementById('installmentPlan').value;
+        const productId = document.getElementById('productId').value;
+        const productPrice = parseFloat(document.getElementById('productPrice').value.replace(/,/g, ''));
+
+        if (!financePartnerId || !planId) {
+            document.getElementById('prepayAmount').textContent = '0 ₫';
+            document.getElementById('totalInstallmentAmount').textContent = '0 ₫';
+            document.getElementById('monthlyPayment').textContent = '0 ₫';
+            document.getElementById('requestInstallmentBtn').disabled = true;
+            return;
+        }
+
+        const elements = ['prepayAmount', 'totalInstallmentAmount', 'monthlyPayment'];
+        elements.forEach(id => {
+            document.getElementById(id).textContent = 'Đang tính toán...';
+        });
+        document.getElementById('requestInstallmentBtn').disabled = true;
+
+        const url = `/user/installment/calculate?productId=${productId}&planId=${planId}&financePartnerId=${financePartnerId}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.redirected && response.url.includes('/login')) {
+                throw new Error('Vui lòng đăng nhập để sử dụng tính năng trả góp');
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    if (text.includes('Tech Shop || Sign in') || text.includes('login')) {
+                        throw new Error('Vui lòng đăng nhập để sử dụng tính năng trả góp');
+                    }
+                    throw new Error(`Server trả về định dạng không đúng. Expected JSON, got: ${contentType}`);
+                });
+            }
+
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+                }).catch(() => {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                });
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            if (data.success === false || data.error) {
+                throw new Error(data.message || data.error || 'Có lỗi xảy ra');
+            }
+
+            if (!data.prepayAmount || !data.totalAmount || !data.monthlyPayment || !data.installmentPlan) {
+                throw new Error('Dữ liệu trả về không đầy đủ');
+            }
+
+            document.getElementById('prepayAmount').textContent = formatCurrency(data.prepayAmount);
+            document.getElementById('totalInstallmentAmount').textContent = formatCurrency(data.totalAmount);
+            document.getElementById('monthlyPayment').textContent = formatCurrency(data.monthlyPayment);
+
+            document.getElementById('loanAmount').value = data.loanAmount;
+            document.getElementById('totalInterest').value = data.totalInterest;
+            document.getElementById('monthlyPaymentValue').value = data.monthlyPayment;
+            document.getElementById('requestInstallmentBtn').disabled = false;
+
+            document.getElementById('selectedPlanId').value = planId;
+            document.getElementById('selectedFinancePartnerId').value = financePartnerId;
+            document.getElementById('selectedPlanInfo').textContent = `${data.installmentPlan.months} tháng - ${data.installmentPlan.interestRate}% lãi suất`;
+            document.getElementById('selectedMonthlyPayment').textContent = formatCurrency(data.monthlyPayment);
+        })
+        .catch(error => {
+            document.getElementById('prepayAmount').textContent = '0 ₫';
+            document.getElementById('totalInstallmentAmount').textContent = '0 ₫';
+            document.getElementById('monthlyPayment').textContent = '0 ₫';
+            document.getElementById('requestInstallmentBtn').disabled = true;
+
+            let errorMessage = 'Có lỗi xảy ra khi tính toán trả góp.';
+            if (error.message.includes('đăng nhập')) {
+                errorMessage = 'Vui lòng đăng nhập để sử dụng tính năng trả góp';
+            } else if (error.message.includes('JSON')) {
+                errorMessage = 'Lỗi kết nối server. Vui lòng thử lại sau.';
+            } else {
+                errorMessage += ' Chi tiết: ' + error.message;
+            }
+            alert(errorMessage);
+        });
+    }
+
+    function formatCurrency(amount) {
+        try {
+            const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+            if (isNaN(num)) {
+                return '0 ₫';
+            }
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
+        } catch (error) {
+            return amount + ' ₫';
+        }
+    }
+
+    async function submitInstallmentRequest() {
+        const requiredFields = ['fullName', 'phone', 'email', 'idNumber', 'address'];
+        let isValid = true;
+
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field || !field.value.trim()) {
+                if (field) field.classList.add('is-invalid');
+                isValid = false;
+            } else if (field) {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        const documentsField = document.getElementById('documents');
+        if (!documentsField || !documentsField.files.length) {
+            if (documentsField) documentsField.classList.add('is-invalid');
+            isValid = false;
+        } else if (documentsField) {
+            documentsField.classList.remove('is-invalid');
+        }
+
+        const agreeTerms = document.getElementById('agreeTerms');
+        if (!agreeTerms || !agreeTerms.checked) {
+            if (agreeTerms) agreeTerms.classList.add('is-invalid');
+            isValid = false;
+        } else if (agreeTerms) {
+            agreeTerms.classList.remove('is-invalid');
+        }
+
+        if (!isValid) {
+            alert('Vui lòng điền đầy đủ thông tin bắt buộc và tải lên giấy tờ cần thiết.');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            const documents = document.getElementById('documents').files;
+            for (let i = 0; i < documents.length; i++) {
+                formData.append('documents', documents[i]);
+            }
+
+            const requestData = {
+                productId: document.getElementById('productId').value,
+                installmentPlanId: document.getElementById('selectedPlanId').value,
+                financePartnerId: document.getElementById('selectedFinancePartnerId').value,
+                loanAmount: parseFloat(document.getElementById('loanAmount').value || '0'),
+                monthlyPayment: parseFloat(document.getElementById('monthlyPayment').value || '0'),
+                totalInterest: parseFloat(document.getElementById('totalInterest').value || '0')
+            };
+
+            formData.append('request', new Blob([JSON.stringify(requestData)], {
+                type: 'application/json'
+            }));
+
+            const response = await fetch('/user/installment/submitRequest', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                $('#installmentRequestModal').modal('hide');
+                const requestId = result.requestId;
+                if (requestId) {
+                    window.location.href = `/user/installment/confirmation?requestId=${requestId}`;
+                } else {
+                    alert('Không tìm thấy ID yêu cầu. Vui lòng kiểm tra lại.');
+                }
+            } else {
+                alert(result.message || 'Có lỗi xảy ra khi gửi yêu cầu');
+            }
+        } catch (error) {
+            alert('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.');
+        }
+    }
+
+    // ==================== OTHER SCRIPTS ====================
+    $(document).ready(function () {
+        const ratingValueInput = $("#ratingValue");
+        $(".fa-star").click(function () {
+            const starId = $(this).attr("id");
+            const rating = starId.replace("st", "");
+            ratingValueInput.val(rating);
+            $(".fa-star").css("color", "black");
+            for (let i = 1; i <= rating; i++) {
+                $("#st" + i).css("color", "blue");
+            }
+        });
+    });
+
+    document.querySelectorAll('.wishlist-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const actionUrl = this.getAttribute('action');
+
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    toast.warning('Please login to add to wishlist!');
+                    setTimeout(() => {
+                        const currentPath = window.location.pathname;
+                        window.location.href = '/login?redirect=' + encodeURIComponent(currentPath);
+                    }, 3000);
+                    return Promise.reject('redirect_to_login');
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.success !== undefined) {
+                    let countEl = document.querySelector('.wishlist .cart-count');
+                    if (!countEl) {
+                        const wishlistEl = document.querySelector('.wishlist a');
+                        countEl = document.createElement('p');
+                        countEl.classList.add('cart-count');
+                        wishlistEl.prepend(countEl);
+                    }
+                    countEl.textContent = data.wishlistCount;
+                    countEl.style.display = data.wishlistCount > 0 ? "block" : "none";
+
+                    if (data.success) {
+                        const productId = form.querySelector('input[name="productId"]').value;
+                        const btn = document.querySelector(`.wishlist[data-product-id="${productId}"] .wishlist-btn`);
+                        if (btn) {
+                            btn.classList.add('active');
+                            const icon = btn.querySelector('i');
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        }
+                        toast.success('Added to wishlist!');
+                    } else {
+                        toast.warning('Product is already in wishlist!');
+                    }
+                }
+            })
+            .catch(err => {
+                if (err !== 'redirect_to_login') {
+                    toast.error('An error occurred, please try again!');
+                }
+            });
+        });
+    });
+
+    $(document).on('click', '.quickview a', function (event) {
+        event.preventDefault();
+        const productId = $(this).closest('li').attr('value');
+
+        $.ajax({
+            url: '/user/products/quick-view',
+            type: 'GET',
+            data: {id: productId},
+            success: function (data) {
+                if (data) {
+                    $('#product-name').text(data.name);
+                    $('#product-price').text(data.price);
+                    $('#product-old-price').text(data.oldPrice);
+                    $('#product-feedback').text(data.ratings);
+                    $('#product-description').text(data.description || 'Không có mô tả');
+                    $('#quick-view-modal').modal('show');
+                } else {
+                    toast.error('Không tìm thấy thông tin sản phẩm!');
+                }
+            },
+            error: function () {
+                toast.error('Có lỗi xảy ra khi tải dữ liệu sản phẩm!', 'Lỗi kết nối');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title th:text="#{checkout.page_title}">Checkout</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+</head>
+
+<body class="sticky-header">
+<!-- Start Header -->
+<div th:insert="~{user/fragments/header::header}"></div>
+<!-- End Header -->
+
+<main class="main-wrapper">
+
+    <!-- Start Checkout Area  -->
+    <div class="axil-checkout-area axil-section-gap">
+        <div class="container">
+            <form action="#">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="axil-checkout-notice">
+                            <div class="axil-toggle-box">
+                                <div class="toggle-bar">
+                                    <i class="fas fa-pencil"></i>
+                                    <span th:text="#{checkout.coupon_title}">Have a coupon?</span>
+                                    <a href="javascript:void(0)" class="toggle-btn">
+                                        <span th:text="#{checkout.coupon_click}">Click here to enter your code</span>
+                                        <i class="fas fa-angle-down"></i>
+                                    </a>
+                                </div>
+
+                                <div class="axil-checkout-coupon toggle-open">
+                                    <p th:text="#{checkout.coupon_description}">If you have a coupon code, please apply it below.</p>
+                                    <div class="input-group">
+                                        <input th:placeholder="#{checkout.coupon_placeholder}" type="text" name="voucher"
+                                               id="voucher-code">
+                                        <div class="apply-btn">
+                                            <button type="button" class="axil-btn btn-bg-primary"
+                                                    onclick="applyVoucher()" th:text="#{checkout.apply_button}">Apply
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p id="voucher-message" style="color:red; margin-top:8px;"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="axil-checkout-billing">
+                            <h4 class="title mb--40" th:text="#{checkout.billing_title}">Billing details</h4>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label th:text="#{checkout.first_name}">First Name <span>*</span></label>
+                                        <input type="text" id="first-name" th:value="${user.getFirstName()}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label th:text="#{checkout.last_name}">Last Name <span>*</span></label>
+                                        <input type="text" id="last-name" th:value="${user.getLastName()}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label th:text="#{checkout.phone}">Phone <span>*</span></label>
+                                <input type="tel" id="phone" th:value="${user.getPhoneNumber()}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label th:text="#{checkout.email}">Email Address <span>*</span></label>
+                                <input type="email" id="email" th:value="${user.getEmail()}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label th:text="#{checkout.address}">Address <span>*</span></label>
+                                <div th:if="${hasAddress}">
+                                    <select id="Region">
+                                        <option th:each="address : ${addresses}"
+                                                th:value="${address.getId()}"
+                                                th:text="|${address.getDetailLocation()}, ${address.getStreet()}, ${address.getDistrict()}, ${address.getCity()}|">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <button type="button" class="axil-btn btn-bg-secondary" data-bs-toggle="modal"
+                                            data-bs-target="#address-modal" th:text="#{checkout.enter_address}">Enter address to payment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="axil-order-summery order-checkout-summery">
+                            <h5 class="title mb--20" th:text="#{checkout.order_title}">Your Order</h5>
+                            <div class="summery-table-wrap">
+                                <table class="table summery-table">
+                                    <thead>
+                                    <tr>
+                                        <th th:text="#{checkout.product}">Product</th>
+                                        <th th:text="#{checkout.subtotal}">Subtotal</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="order-product" th:each="cartDetail : ${cartDetailResponseToBuy}">
+                                        <td th:text="|${cartDetail.getProductName()} x${cartDetail.getQuantity()}|"></td>
+                                        <td th:text="${cartDetail.getTotalPriceString()}"></td>
+                                    </tr>
+                                    <tr class="order-shipping">
+                                        <!-- Shipping methods removed as per original code -->
+                                    </tr>
+                                    <tr class="order-total">
+                                        <td th:text="#{checkout.total}">Total</td>
+                                        <td class="order-total-amount" th:text="${totalPriceToPayment}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="order-payment-method">
+                                <div class="single-payment">
+                                    <div class="input-group">
+                                        <input type="radio" id="radio5" name="payment" value="cod" checked>
+                                        <label for="radio5" th:text="#{checkout.cod}">Cash on delivery</label>
+                                    </div>
+                                    <p th:text="#{checkout.cod_description}">Pay with cash upon delivery.</p>
+                                </div>
+                                <div class="single-payment">
+                                    <div class="input-group">
+                                        <input type="radio" id="radio4" name="payment" value="vnpay">
+                                        <label for="radio4" th:text="#{checkout.vnpay}">VNPay</label>
+                                    </div>
+                                    <p th:text="#{checkout.vnpay_description}">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.</p>
+                                </div>
+                                <!-- PayPal removed as per original code -->
+                            </div>
+                            <a href="#" class="axil-btn btn-bg-primary checkout-btn"
+                               onclick="processCheckout()" th:text="#{checkout.process_button}">Process to Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- End Checkout Area  -->
+
+    <!-- Address Modal -->
+    <div class="modal fade" id="address-modal" tabindex="-1" aria-labelledby="address-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="address-modal-label" th:text="#{checkout.address_modal_title}">Enter your address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="city" th:text="#{checkout.city}">City</label>
+                        <input type="text" class="form-control" id="city" th:placeholder="#{checkout.city_placeholder}">
+                    </div>
+                    <div class="form-group">
+                        <label for="district" th:text="#{checkout.district}">District</label>
+                        <input type="text" class="form-control" id="district" th:placeholder="#{checkout.district_placeholder}">
+                    </div>
+                    <div class="form-group">
+                        <label for="street" th:text="#{checkout.street}">Street</label>
+                        <input type="text" class="form-control" id="street" th:placeholder="#{checkout.street_placeholder}">
+                    </div>
+                    <div class="form-group">
+                        <label for="detailLocation" th:text="#{checkout.detail_location}">Detail Location</label>
+                        <input type="text" class="form-control" id="detailLocation"
+                               th:placeholder="#{checkout.detail_location_placeholder}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{checkout.close_button}">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAddress()" th:text="#{checkout.save_address}">Save Address</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div th:insert="~{/user/fragments/service-area-footer::service-area-footer}"></div>
+<!-- Start Footer Area  -->
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- Product Quick View Modal Start -->
+<div th:insert="~{/user/fragments/quickview::quick-view}"></div>
+<!-- Product Quick View Modal End -->
+
+<!-- Header Search Modal End -->
+<div th:insert="~{/user/fragments/header-search::header-search}"></div>
+<!-- Header Search Modal End -->
+
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><a
+                                th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                th:text="${cartDetail.productName}"></a></h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span
+                                th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+                <a th:href="@{/user/checkout}" class="axil-btn btn-bg-secondary checkout-btn" th:text="#{cart.checkout}">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script>
+    function processCheckout() {
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        const addressId = document.getElementById('Region').value;
+        const voucher = document.getElementById('voucher-code').value;
+        const newPriceText = document.querySelector('.order-total-amount').textContent;
+
+        // Convert giá trị "1.530.000 đ" → 1530000
+        const numericPrice = newPriceText.replace(/[^\d]/g, '');
+        const newPrice = numericPrice ? numericPrice : "0";
+
+        const formData = new FormData();
+        formData.append('paymentMethod', paymentMethod);
+        formData.append('addressId', addressId);
+        formData.append('voucher', voucher);
+        formData.append('newPrice', newPrice);
+
+        const checkoutBtn = document.querySelector('.checkout-btn');
+        const originalText = checkoutBtn.textContent;
+        checkoutBtn.textContent = 'Processing...';
+        checkoutBtn.disabled = true;
+
+        fetch('/user/checkout/process', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.redirectUrl) {
+                if (data.redirectUrl.startsWith('/user/order-success')) {
+                    window.location.href = data.redirectUrl;
+                } else if (data.redirectUrl.startsWith('/user/checkout/')) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    window.location.href = data.redirectUrl;
+                }
+            } else if (data.error) {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Network error.");
+        })
+        .finally(() => {
+            checkoutBtn.textContent = originalText;
+            checkoutBtn.disabled = false;
+        });
+    }
+
+    function saveAddress() {
+        var city = $("#city").val();
+        const district = $("#district").val();
+        const street = $("#street").val();
+        const detailLocation = $("#detailLocation").val();
+
+        if (city === "") {
+            alert("Please enter your city!");
+            return;
+        }
+        if (district === "") {
+            alert("Please enter your district!");
+            return;
+        }
+        if (street === "") {
+            alert("Please enter your street!");
+            return;
+        }
+        if (detailLocation === "") {
+            alert("Please enter your detail location!");
+            return;
+        }
+
+        $.ajax({
+            url: "/user/checkout/save-address",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({city: city, district: district, street: street, detailLocation: detailLocation}),
+            success: function (response) {
+                alert("Address saved successfully!");
+                $('#address-modal').modal('hide');
+                window.location.reload();
+            },
+            error: function (xhr) {
+                alert("Failed to save address. Please try again.");
+            }
+        });
+    }
+</script>
+
+<script th:inline="javascript">
+    const voucherName = /*[[${voucherNames}]]*/ [];
+    const voucherValue = /*[[${voucherValues}]]*/ [];
+
+    const totalElement = document.querySelector('.order-total-amount');
+    const originalTotal = totalElement.textContent;
+
+    function formatVnd(value) {
+        return new Intl.NumberFormat('vi-VN').format(value) + " đ";
+    }
+
+    function applyVoucher() {
+        const voucherCode = document.getElementById('voucher-code').value.trim();
+        const voucherIndex = voucherName.indexOf(voucherCode);
+        const messageElement = document.getElementById('voucher-message');
+
+        let baseTotal = originalTotal.replace(/[^\d]/g, '');
+        baseTotal = parseFloat(baseTotal);
+
+        if (voucherIndex !== -1) {
+            const discountPercent = voucherValue[voucherIndex];
+            const discountAmount = baseTotal * (discountPercent / 100);
+            const newPrice = baseTotal - discountAmount;
+
+            let voucherRow = document.querySelector('.order-voucher');
+            if (!voucherRow) {
+                const tableBody = totalElement.closest('tbody');
+                voucherRow = document.createElement('tr');
+                voucherRow.classList.add('order-voucher');
+                voucherRow.innerHTML = `
+                    <td>Voucher (${discountPercent}%)</td>
+                    <td class="voucher-amount"></td>
+                `;
+                tableBody.insertBefore(voucherRow, totalElement.closest('tr'));
+            }
+            voucherRow.querySelector('.voucher-amount').textContent = "-" + formatVnd(discountAmount);
+
+            totalElement.textContent = formatVnd(newPrice);
+
+            if (messageElement) messageElement.textContent = "";
+        } else {
+            const voucherRow = document.querySelector('.order-voucher');
+            if (voucherRow) voucherRow.remove();
+
+            totalElement.textContent = originalTotal;
+
+            if (messageElement) {
+                messageElement.style.color = "red";
+                messageElement.textContent = "This voucher code does not exist!";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

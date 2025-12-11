@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <title th:text="#{page.title}">Tech Shop || Home</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+    <link rel="stylesheet"
+          th:href="@{/user/customize/css/main.css}"/>
+</head>
+
+<body>
+<div th:insert="~{user/fragments/header-home::header-home}"></div>
+<main class="main-wrapper">
+    <!-- Start Slider Area -->
+    <div th:replace="~{user/fragments/slidebar::slidebar}"></div>
+    <!-- End Slider Area -->
+
+    <!-- Start Expolre Product Area  -->
+    <div class="axil-product-area bg-color-white axil-section-gap">
+        <div class="container">
+            <div class="section-title-wrapper">
+          <span class="title-highlighter highlighter-primary">
+            <i class="far fa-shopping-basket"></i>
+            <span th:text="#{products.our_products}">Our Products</span>
+          </span>
+                <a th:href="@{/user/products}">
+                    <h2 class="title" th:text="#{products.explore_products}">Explore our Products</h2>
+                </a>
+            </div>
+            <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+                <!-- Start .slick-single-layout -->
+                <div class="slick-single-layout">
+                    <div class="row row--15">
+                        <!-- Start Single Product  -->
+                        <div class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30"
+                             th:each="product:${products}">
+                            <div class="axil-product product-style-one">
+                                <div class="thumbnail">
+                                    <a th:href="@{/user/products/product-detail/{id}(id=${product.id})}">
+                                        <img th:if="${product.isUrlImage()}"
+                                             th:src="${product.thumbnail}"
+                                             class="product-image"
+                                             th:alt="#{product.image_alt}">
+                                        <img th:unless="${product.isUrlImage()}"
+                                             th:src="@{'/uploads/' + ${product.thumbnail}}"
+                                             class="product-image"
+                                             th:alt="#{product.image_alt}">
+                                    </a>
+                                    <div class="label-block label-right">
+                                        <div class="product-badget" th:text="#{product.discount}">20% Off</div>
+                                    </div>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview" th:value="${product.id}">
+                                                <a href="#" data-bs-toggle="modal" data-bs-target="#quick-view-modal">
+                                                    <i class="far fa-eye"></i>
+                                                </a>
+                                            </li>
+                                            <li class="select-option">
+                                                <form th:action="@{/user/cart/cart-add}" method="post"
+                                                      class="cart-action">
+                                                    <input type="hidden" name="productId" th:value="${product.id}"/>
+                                                    <input type="hidden" name="quantity" value="1"/>
+                                                    <li class="select-option">
+                                                        <button type="submit" class="add-to-cart-btn">
+                                                            <span th:text="#{products.add_to_cart}">Add to cart</span>
+                                                        </button>
+                                                    </li>
+                                                </form>
+                                            </li>
+                                            <li class="wishlist" th:attr="data-product-id=${product.id}">
+                                                <form th:action="@{/user/wishlist/insert}" method="post" class="wishlist-form">
+                                                    <input type="hidden" name="wishlistId" th:value="${session.wishlistId}">
+                                                    <input type="hidden" name="productId" th:value="${product.id}">
+                                                    <button type="submit" class="wishlist-btn"
+                                                            th:classappend="${wishedProductIds.contains(product.id) ? 'active' : ''}">
+                                                        <i th:class="${wishedProductIds.contains(product.id) ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <div class="inner">
+                                        <h5 class="title">
+                                            <a th:href="@{/user/products/product-detail/{id}(id=${product.id})}"
+                                               th:text="${product.name}"></a>
+                                        </h5>
+                                        <div class="product-price-variant">
+                                            <span class="price current-price" th:text="${product.price}"></span>
+                                            <span class="price old-price" th:text="${product.oldPrice}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Single Product  -->
+                        <!--Pagination here-->
+                        <div class="custom-pagination">
+                            <ul>
+                                <li th:if="${currentPage > 0}">
+                                    <a th:href="@{/user/home(pageNumber=${currentPage - 1}, pageSize=${pageSize}, lang=${#locale.language})}"
+                                       style="padding: 0 40px;" class="prev" th:text="#{pagination.previous}">Previous</a>
+                                </li>
+                                <li th:each="index : ${#numbers.sequence(0, totalPages - 1)}">
+                                    <a th:href="@{/user/home(pageNumber=*{index}, pageSize=${pageSize}, lang=${#locale.language})}"
+                                       th:text="${index + 1}"
+                                       th:classappend="${index == currentPage} ? 'active' : '' "
+                                       class="page"></a>
+                                </li>
+                                <li th:if="${currentPage < totalPages - 1}">
+                                    <a th:href="@{/user/home(pageNumber=${currentPage + 1}, pageSize=${pageSize}, lang=${#locale.language})}"
+                                       class="next" th:text="#{pagination.next}">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- End Pagination here-->
+                    </div>
+                </div>
+                <!-- End .slick-single-layout -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div class="modal fade" id="quick-view-modal" tabindex="-1" aria-labelledby="quick-view-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quick-view-modal-label" th:text="#{modal.product_details}">Chi tiết sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="product-details">
+                        <p><strong th:text="#{modal.product_name}">Tên sản phẩm:</strong> <span id="product-name"></span></p>
+                        <p><strong th:text="#{modal.price}">Giá:</strong> <span id="product-price"></span></p>
+                        <p><strong th:text="#{modal.old_price}">Giá cũ:</strong> <span id="product-old-price"></span></p>
+                        <p><strong th:text="#{modal.details}">Chi tiết:</strong> <span id="product-description"></span></p>
+                        <p><strong th:text="#{modal.ratings}">Số lượt đánh giá:</strong> <span id="product-feedback"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{modal.close}">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Explore Product Area  -->
+
+    <!--Start service area-->
+    <div th:replace="~{user/fragments/content::category-area}"></div>
+    <!-- End service area-->
+
+</main>
+
+<div th:insert="~{user/fragments/service-area-footer::service-area-footer}"></div>
+<!-- Start Footer Area  -->
+<div id="footer" th:insert="~{user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- Cart dropdown Start -->
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title">
+                            <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                               th:text="${cartDetail.productName}"></a>
+                        </h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn d-flex justify-content-around align-items-center">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Cart dropdown End -->
+
+<!-- JS -->
+<div th:insert="~{user/fragments/script::script}"></div>
+
+<div th:if="${param.logout}">
+    <script>
+        toast.success('Log out successfully!');
+    </script>
+</div>
+
+<script>
+    // ===== WISHLIST FORM SUBMIT =====
+    document.querySelectorAll('.wishlist-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const actionUrl = this.getAttribute('action');
+
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    toast.warning('Please login to add to wishlist!');
+                    setTimeout(() => {
+                        const currentPath = window.location.pathname;
+                        window.location.href = '/login?redirect=' + encodeURIComponent(currentPath);
+                    }, 3000);
+                    return Promise.reject('redirect_to_login');
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.success !== undefined) {
+                    let countEl = document.querySelector('.wishlist .cart-count');
+                    if (!countEl) {
+                        const wishlistEl = document.querySelector('.wishlist a');
+                        countEl = document.createElement('p');
+                        countEl.classList.add('cart-count');
+                        wishlistEl.prepend(countEl);
+                    }
+                    countEl.textContent = data.wishlistCount;
+                    countEl.style.display = data.wishlistCount > 0 ? "block" : "none";
+
+                    if (data.success) {
+                        const productId = form.querySelector('input[name="productId"]').value;
+                        const btn = document.querySelector(`.wishlist[data-product-id="${productId}"] .wishlist-btn`);
+                        if (btn) {
+                            btn.classList.add('active');
+                            const icon = btn.querySelector('i');
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        }
+                        toast.success('Added to wishlist!');
+                    } else {
+                        toast.warning('Product is already in wishlist!');
+                    }
+                }
+            })
+            .catch(err => {
+                if (err !== 'redirect_to_login') {
+                    console.error("Error:", err);
+                    toast.error('An error occurred, please try again!');
+                }
+            });
+        });
+    });
+
+    // ===== QUICK VIEW MODAL =====
+    $(document).on('click', '.quickview a', function (event) {
+        event.preventDefault();
+        const productId = $(this).closest('li').attr('value');
+
+        $.ajax({
+            url: '/user/products/quick-view',
+            type: 'GET',
+            data: { id: productId },
+            success: function (data) {
+                if (data) {
+                    $('#product-name').text(data.name);
+                    $('#product-price').text(data.price);
+                    $('#product-old-price').text(data.oldPrice);
+                    $('#product-feedback').text(data.ratings);
+                    $('#product-description').text(data.description || 'No description available');
+                    $('#quick-view-modal').modal('show');
+                } else {
+                    toast.error('Product information not found!');
+                }
+            },
+            error: function () {
+                toast.error('Error loading product data!');
+            }
+        });
+    });
+</script>
+<div th:insert="~{user/fragments/chatbox::chatbox}"></div>
+
+</body>
+</html>

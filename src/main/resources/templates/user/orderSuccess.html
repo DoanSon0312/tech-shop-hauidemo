@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${paymentMethod == 'cod' ? 'Order Successful' : 'Payment Successful'}">Payment Successful</title>
+    <div th:insert="~{/user/fragments/head::head}"></div>
+    <style>
+        .success-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 20px auto;
+        }
+
+        .vnpay-logo {
+            display: block;
+            margin: 0 auto 20px;
+            height: 80px;
+            width: 80px;
+        }
+
+        .btn-lg-custom {
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 8px;
+            min-width: 220px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .btn-lg-custom {
+                min-width: 180px;
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- start body -->
+<div class="body py-5">
+    <div class="container">
+        <div class="w-50 m-auto">
+            <div class="success-container">
+                <!-- VNPay Logo - Only show if not COD -->
+                <img th:if="${paymentMethod != 'cod'}"
+                     th:src="@{/user/assets/images/my-image/vnpay.png}"
+                     class="vnpay-logo"
+                     alt="VNPay Logo">
+
+                <!-- Success Title -->
+                <h1 class="my-3 text-success text-center">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${paymentMethod == 'cod' ? 'Order Successful' : 'Payment Successful'}">Payment Successful</span>
+                </h1>
+
+                <!-- Order Details -->
+                <h2 class="my-3 h4">Order Details</h2>
+
+                <!-- Order Information Table -->
+                <table class="table table-bordered table-hover">
+                    <tbody>
+                    <tr>
+                        <td class="fw-bold">Order Information:</td>
+                        <td><span th:text="${orderId}" class="text-primary">[order ID]</span></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Total Amount:</td>
+                        <td class="text-success fw-bold">
+                            <span th:text="${totalPrice}">[total price]</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold" th:text="${paymentMethod == 'cod' ? 'Order Time:' : 'Payment Time:'}">Payment Time:</td>
+                        <td><span th:text="${paymentTime}">[payment time]</span></td>
+                    </tr>
+                    <tr th:if="${paymentMethod != 'cod' and transactionId != null and transactionId != 'Không áp dụng'}">
+                        <td class="fw-bold">Transaction ID:</td>
+                        <td><span th:text="${transactionId}">[transaction ID]</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+                    <!-- Download Invoice Button -->
+                    <a th:if="${orderId != null}"
+                       th:href="@{'/user/invoices/' + ${orderId} + '/download'}"
+                       class="btn btn-success btn-lg btn-lg-custom"
+                       target="_blank"
+                       onclick="handleDownload(this)">
+                        <i class="fas fa-file-pdf me-2"></i>
+                        Download Invoice (PDF)
+                    </a>
+
+                    <!-- Home Button -->
+                    <a href="/user/home"
+                       class="btn btn-primary btn-lg btn-lg-custom">
+                        <i class="fas fa-home me-2"></i>
+                        Back to Home
+                    </a>
+                </div>
+
+                <!-- Success Message -->
+                <div class="alert alert-success mt-4" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Congratulations!</strong>
+                    <span th:text="${paymentMethod == 'cod' ? 'Your order has been placed successfully.' : 'Your order has been paid successfully.'}">Your order has been processed successfully.</span>
+                    We will contact you soon to confirm and deliver your order as soon as possible.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleDownload(element) {
+        const originalText = element.innerHTML;
+        element.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating file...';
+        element.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            element.innerHTML = originalText;
+            element.style.pointerEvents = 'auto';
+        }, 3000);
+
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+
+        if (error) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger mt-3';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error:</strong> ${decodeURIComponent(error)}
+            `;
+
+            const container = document.querySelector('.success-container');
+            container.appendChild(alertDiv);
+        }
+    });
+</script>
+
+<!-- end body -->
+</body>
+</html>

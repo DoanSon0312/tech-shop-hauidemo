@@ -1,0 +1,601 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<!-- Mirrored from new.axilthemes.com/demo/template/etrade/blog-grid.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 14 Oct 2024 00:33:41 GMT -->
+<head>
+    <title th:text="#{profile.page_title}">TechShop || Profile</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+    <link rel="stylesheet"
+          th:src="@{/user/customize/css/error.css}"
+    />
+
+</head>
+
+<body class="sticky-header">
+<!-- Start Header -->
+<div th:insert="~{user/fragments/header::header}"></div>
+<!-- End Header -->
+
+<main class="main-wrapper">
+    <!-- Start Breadcrumb Area  -->
+    <div class="axil-breadcrumb-area">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="inner">
+                        <ul class="axil-breadcrumb">
+                            <li class="axil-breadcrumb-item"><a th:href="@{/user/home}" th:text="#{nav.home}">Home</a></li>
+                            <li class="separator"></li>
+                            <li class="axil-breadcrumb-item active" aria-current="page" th:text="#{profile.my_account}">My Account</li>
+                        </ul>
+                        <h1 class="title" th:text="#{profile.view_profile}">View your profile details</h1>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-4">
+                    <div class="inner">
+                        <div class="bradcrumb-thumb">
+                            <img th:src="@{/user/assets/images/product/product-45.png}" th:alt="#{profile.image}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Breadcrumb Area  -->
+
+    <!-- Start My Account Area  -->
+    <div class="axil-dashboard-area axil-section-gap">
+        <div class="container">
+            <div class="axil-dashboard-warp">
+                <div class="axil-dashboard-author">
+                    <div class="media">
+                        <div class="thumbnail">
+                            <div class="profile-picture-section">
+                                <form id="uploadForm" enctype="multipart/form-data">
+                                    <label for="profileImage">
+                                        <img id="profileImagePreview" th:if="${profileDto.image != null}"
+                                             th:src="@{'/uploads/' + ${profileDto.image}}" th:alt="#{profile.welcome}"
+                                             class="profile-picture"
+                                             style="width: 50px; height: 50px;">
+                                        <img th:if="${profileDto.image == null}" th:alt="#{profile.welcome_default}"
+                                             th:src="@{/user/assets/images/product/author1.png}"
+                                             class="profile-picture">
+                                    </label>
+                                    <input type="file" id="profileImage" name="profileImage" accept="image/*"
+                                           style="display: none;">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="media-body">
+                            <h5 class="title mb-0"
+                                th:text="#{profile.hello} + ' ' + ${profileDto.firstName} + ' ' + ${profileDto.lastName}"></h5>
+                            <span class="joining-date" th:text="#{profile.member_since}">LaptopShop's Member Since Sep 2025</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-3 col-md-4">
+                        <aside class="axil-dashboard-aside">
+                            <nav class="axil-dashboard-nav">
+                                <div class="nav nav-tabs" role="tablist">
+                                    <a class="nav-item nav-link active" data-bs-toggle="tab" href="#nav-account"
+                                       role="tab" aria-selected="true"><i class="fas fa-user"></i><span th:text="#{profile.account_details}">Account Details</span></a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-reset-password"
+                                       role="tab" aria-selected="false"><i class="fas fa-user"></i><span th:text="#{profile.password_details}">Password Details</span></a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-update-avatar"
+                                       role="tab" aria-selected="false"><i class="fas fa-user"></i><span th:text="#{profile.your_image}">Your image</span></a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-orders" role="tab"
+                                       aria-selected="false"><i class="fas fa-shopping-basket"></i><span th:text="#{profile.orders}">Orders</span></a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-address" role="tab"
+                                       aria-selected="false"><i class="fas fa-home"></i><span th:text="#{profile.addresses}">Addresses</span></a>
+                                    <a class="nav-item nav-link" th:href="@{/logout}"><i class="fal fa-sign-out"></i><span th:text="#{account.logout}">Logout</span></a>
+                                </div>
+                            </nav>
+                        </aside>
+                    </div>
+                    <div class="col-xl-9 col-md-8">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="nav-account" role="tabpanel">
+                                <div class="col-lg-9">
+                                    <div class="axil-dashboard-account">
+                                        <form class="account-details-form" id="profile-form"
+                                              th:action="@{/user/my-account}"
+                                              method="post"
+                                              th:object="${profileDto}">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.first_name}">First Name</label>
+                                                        <input type="text" class="form-control" th:field="*{firstName}">
+                                                        <small id="firstName-error" class="error-text"></small></div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.last_name}">Last Name</label>
+                                                        <input type="text" class="form-control" th:field="*{lastName}">
+                                                        <small id="lastName-error" class="error-text"></small></div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.username}">Username</label>
+                                                        <input type="text" class="form-control" th:field="*{username}">
+                                                        <small id="username-error" class="error-text"></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.email}">Email</label>
+                                                        <input type="text" class="form-control" th:field="*{email}">
+                                                        <small id="email-error" class="error-text"></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.phone_number}">Phone Number</label>
+                                                        <input type="text" class="form-control" th:field="*{phone}">
+                                                        <small id="phone-error" class="error-text"></small></div>
+                                                </div>
+                                                <div class="col-lg-6 col-sm-6">
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.dob}">Day of birth</label>
+                                                        <input type="date" class="form-control" th:field="*{dob}">
+                                                        <small id="dob-error" class="error-text"></small></div>
+                                                </div>
+                                                <div class="form-group col-lg-6 col-sm-3">
+                                                    <div class="gender-box">
+                                                        <h3 th:text="#{profile.gender}">Gender</h3>
+                                                        <div class="gender-option">
+                                                            <div class="gender">
+                                                                <input type="radio" id="check-male" name="gender"
+                                                                       value="Nam"
+                                                                       th:checked="${profileDto.gender == 'Nam'}"/>
+                                                                <label for="check-male" th:text="#{profile.male}">Male</label>
+                                                            </div>
+                                                            <div class="gender">
+                                                                <input type="radio" id="check-female" name="gender"
+                                                                       value="Nữ"
+                                                                       th:checked="${profileDto.gender == 'Nữ'}"/>
+                                                                <label for="check-female" th:text="#{profile.female}">Female</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-lg-6 col-sm-3">
+                                                    <div class="status-box">
+                                                        <h3 th:text="#{profile.status}">Status</h3>
+                                                        <div class="status">
+                                                            <h4 th:if="${profileDto.status}" class="text-success" th:text="#{profile.active}">Hoạt động</h4>
+                                                            <h4 th:unless="${profileDto.status}" class="text-danger" th:text="#{profile.inactive}">Ngừng hoạt động</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group mb--0">
+                                                    <input type="submit" class="axil-btn" th:value="#{profile.save_changes}">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade show" id="nav-reset-password" role="tabpanel">
+                                <div class="col-lg-9">
+                                    <div class="axil-dashboard-account">
+                                        <form class="account-details-form"
+                                              id="change-password-form"
+                                              method="post">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h5 class="title" th:text="#{profile.password_change}">Password Change</h5>
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.old_password}">Old Password</label>
+                                                        <input type="password" class="form-control" name="old-password">
+                                                        <small id="password-error" class="error-text"></small></div>
+                                                    <div class="form-group">
+                                                        <label th:text="#{profile.new_password}">New Password</label>
+                                                        <input type="password" class="form-control"
+                                                               name="password">
+                                                        <small id="confirm-error" class="error-text"></small></div>
+                                                    <div class="form-group mb--0">
+                                                        <input type="submit" class="axil-btn" th:value="#{profile.save_changes}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade show" id="nav-update-avatar" role="tabpanel">
+                                <div class="col-lg-9">
+                                    <div class="axil-dashboard-account">
+                                        <form th:action="@{/user/updateProfileImage}" method="post" enctype="multipart/form-data">
+                                            <div class="form-group">
+                                                <label for="image" th:text="#{profile.your_image}">Your Image</label>
+                                                <input type="file" id="image" name="image" class="form-control">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary" th:text="#{profile.update}">Update</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="nav-orders" role="tabpanel">
+                                <div class="axil-dashboard-order">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th scope="col" th:text="#{profile.order}">Order</th>
+                                                <th scope="col" th:text="#{profile.date}">Date</th>
+                                                <th scope="col" th:text="#{profile.status}">Status</th>
+                                                <th scope="col" th:text="#{profile.total}">Total</th>
+                                                <th scope="col" th:text="#{profile.actions}">Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="order : ${orders}">
+                                                <th scope="row" th:text="${order.getId()}"></th>
+                                                <td th:text="${order.getCreatedAt().toString()}"></td>
+                                                <td th:text="${order.getStatus()}"></td>
+                                                <td th:text="${T(com.haui.tech_shop.utils.PriceUtil).formatPrice(order.getTotalPrice())} + ' ' + #{profile.for} + ' ' + ${order.getOrderDetails().size()} + ' ' + #{profile.items}"></td>
+                                                <td><a th:href="@{/user/orders/detail(id=${order.getId()})}" class="axil-btn view-btn" th:text="#{profile.view}">View</a></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="nav-address" role="tabpanel">
+                                <div class="axil-dashboard-address">
+                                    <a href="#"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#address-modal"
+                                       class="btn btn-primary" style="padding: 14px;font-size: 14px;margin-bottom: 13px;" th:text="#{profile.add_new_address}">Thêm địa chỉ mới</a>
+                                    <div class="row row--30">
+                                        <div class="col-lg-6" th:each="address : ${addresses}">
+                                            <div class="address-info mb--40">
+                                                <div class="addrss-header d-flex align-items-center justify-content-between">
+                                                    <h4 class="title mb-0" th:text="#{profile.shipping_address}">Shipping Address</h4>
+                                                    <a href="#"
+                                                       id="address-edit"
+                                                       class="address-edit"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#edit-address-modal"
+                                                       th:onclick="|loadAddressData(${address.id})|"
+                                                       th:value="${address.id}"><i class="far fa-edit"></i></a>
+                                                </div>
+
+                                                <div class="modal fade" id="edit-address-modal" tabindex="-1" aria-labelledby="address-modal-label" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="add-address-modal-label" th:text="#{profile.update_address}">Update Address</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="form-group">
+                                                                    <label th:text="#{profile.city}">City</label>
+                                                                    <input type="text" class="form-control edit-city" th:placeholder="#{profile.enter_city}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label th:text="#{profile.district}">District</label>
+                                                                    <input type="text" class="form-control edit-district" th:placeholder="#{profile.enter_district}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label th:text="#{profile.street}">Street</label>
+                                                                    <input type="text" class="form-control edit-street" th:placeholder="#{profile.enter_street}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label th:text="#{profile.detail_location}">Detail Location</label>
+                                                                    <input type="text" class="form-control edit-detailLocation" th:placeholder="#{profile.enter_detail_location}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{common.close}">Close</button>
+                                                                <button type="button" class="btn btn-primary" onclick="updateAddress()" th:text="#{profile.update_address}">Update Address</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <ul class="address-details">
+                                                    <li th:text="#{profile.detail} + ': ' + ${address.getDetailLocation()}"></li>
+                                                    <li th:text="#{profile.street} + ': ' + ${address.getStreet()}"></li>
+                                                    <li th:text="#{profile.district} + ': ' + ${address.getDistrict()}"></li>
+                                                    <li th:text="#{profile.city} + ': ' + ${address.getCity()}"></li>
+                                                    <li class="mt--30" th:text="${address.getDetailLocation()} + ', ' +
+                                                                                ${address.getStreet()} + ', ' +
+                                                                                ${address.getDistrict()} + ', ' +
+                                                                                ${address.getCity()}"></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End My Account Area  -->
+    <!-- Address Modal -->
+    <div class="modal fade" id="address-modal" tabindex="-1" aria-labelledby="address-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="address-modal-label" th:text="#{profile.add_address}">Add Address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="city" th:text="#{profile.city}">City</label>
+                        <input type="text" class="form-control" id="city" th:placeholder="#{profile.enter_city}">
+                    </div>
+                    <div class="form-group">
+                        <label for="district" th:text="#{profile.district}">District</label>
+                        <input type="text" class="form-control" id="district" th:placeholder="#{profile.enter_district}">
+                    </div>
+                    <div class="form-group">
+                        <label for="street" th:text="#{profile.street}">Street</label>
+                        <input type="text" class="form-control" id="street" th:placeholder="#{profile.enter_street}">
+                    </div>
+                    <div class="form-group">
+                        <label for="detailLocation" th:text="#{profile.detail_location}">Detail Location</label>
+                        <input type="text" class="form-control" id="detailLocation" th:placeholder="#{profile.enter_detail_location}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{common.close}">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAddress()" th:text="#{profile.save_address}">Save Address</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div th:insert="~{/user/fragments/service-area-footer::service-area-footer}"></div>
+<!-- Start Footer Area  -->
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- Product Quick View Modal Start -->
+<div th:insert="~{/user/fragments/quickview::quick-view}"></div>
+<!-- Product Quick View Modal End -->
+
+<!-- Header Search Modal End -->
+<div th:insert="~{/user/fragments/header-search::header-search}"></div>
+<!-- Header Search Modal End -->
+
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                                  th:text="${cartDetail.productName}"></a></h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+                <a th:href="@{/user/checkout}" class="axil-btn btn-bg-secondary checkout-btn" th:text="#{cart.checkout}">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<div th:insert="~{/user/fragments/script::script}"></div>
+<script>
+    document.getElementById("profile-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const jsonData = {};
+        formData.forEach((value, key) => jsonData[key] = value);
+
+        fetch("/user/my-account/profile", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(jsonData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (typeof data === "string") {
+                    alert(data);
+                } else {
+                    for (const field in data) {
+                        const errorElement = document.getElementById(`${field}-error`);
+                        if (errorElement) {
+                            errorElement.innerText = data[field];
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    });
+
+    document.getElementById("change-password-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch("/user/change-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json();
+                }
+                return response.text();
+            })
+            .then(result => {
+                if (typeof result === "object") {
+                    for (const field in result) {
+                        const errorElement = document.getElementById(`${field}-error`);
+                        if (errorElement) {
+                            errorElement.innerText = result[field];
+                        }
+                    }
+                } else {
+                    alert(result);
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("[[#{profile.change_password_failed}]]");
+            });
+    });
+
+    document.getElementById('profileImage').addEventListener('change', function () {
+        const formData = new FormData(document.getElementById('uploadForm'));
+
+        fetch('/user/updateProfileImage', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('profileImagePreview').src = data.imageUrl;
+                    alert('[[#{profile.image_updated_success}]]');
+                    window.location.reload();
+                } else {
+                    alert('[[#{profile.image_updated_failed}]]' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    function saveAddress() {
+        var city = $("#city").val();
+        const district = $("#district").val();
+        const street = $("#street").val();
+        const detailLocation = $("#detailLocation").val();
+        if (city === "") {
+            alert("[[#{profile.enter_city_alert}]]");
+            return;
+        }
+        if (district === "") {
+            alert("[[#{profile.enter_district_alert}]]");
+            return;
+        }
+        if (street === "") {
+            alert("[[#{profile.enter_street_alert}]]");
+            return;
+        }
+        if (detailLocation === "") {
+            alert("[[#{profile.enter_detail_location_alert}]]");
+            return;
+        }
+
+        $.ajax({
+            url: "/user/save-address",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ city: city, district: district, street: street, detailLocation: detailLocation }),
+            success: function (response) {
+                alert("[[#{profile.address_saved_success}]]");
+                $('#address-modal').modal('hide');
+                window.location.reload();
+            },
+            error: function (xhr) {
+                alert("[[#{profile.address_saved_failed}]]");
+            }
+        });
+    }
+
+    function loadAddressData(addressId) {
+        $.ajax({
+            url: `/user/get-address/${addressId}`,
+            type: 'GET',
+            success: function (response) {
+                $('.edit-city').val(response.city);
+                $('.edit-district').val(response.district);
+                $('.edit-street').val(response.street);
+                $('.edit-detailLocation').val(response.detailLocation);
+                $('#edit-address-modal').modal('show');
+            },
+            error: function (xhr) {
+                alert('[[#{profile.load_address_failed}]]');
+            }
+        });
+    }
+
+    function updateAddress() {
+        const addressId = $('#address-edit').attr('value');
+        const city = $('.edit-city').val();
+        const district = $('.edit-district').val();
+        const street = $('.edit-street').val();
+        const detailLocation = $('.edit-detailLocation').val();
+
+        if (city === "" || district === "" || street === "" || detailLocation === "") {
+            alert("[[#{profile.fill_all_fields}]]");
+            return;
+        }
+
+        $.ajax({
+            url: `/user/update-address`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ addressId: addressId, city: city, district: district, street: street, detailLocation: detailLocation }),
+            success: function (response) {
+                alert('[[#{profile.address_updated_success}]]');
+                $('#edit-address-modal').modal('hide');
+                window.location.reload();
+            },
+            error: function (xhr) {
+                alert('[[#{profile.address_updated_failed}]]');
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

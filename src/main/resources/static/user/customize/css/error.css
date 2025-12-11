@@ -1,0 +1,33 @@
+.form-group .error-text {
+    color: red;
+    font-size: 12px;
+}
+
+.status-box {
+     text-align: center;
+     margin: 10px 0;
+ }
+.status h4 {
+    font-size: 18px;
+    font-weight: bold;
+}
+.text-success {
+    color: green;
+}
+.text-danger {
+    color: red;
+}
+
+.profile-picture-section {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+

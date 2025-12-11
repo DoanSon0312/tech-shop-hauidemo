@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head th:insert="~{/shipper/fragments/head::head}">
+  </head>
+  <body class="  ">
+  <!-- loader Start -->
+      <div id="loading">
+        <div id="loading-center">
+        </div>
+      </div>
+<!-- loader END -->
+<!-- Wrapper Start -->
+    <div class="wrapper">
+        <div th:insert="~{/shipper/fragments/sidebar::sidebar}"></div>
+        <div th:insert="~{/shipper/fragments/navbar::navbar}"></div>
+        <div th:insert="~{/shipper/fragments/header::header}"></div>
+        <div class="content-page">
+            <div class="container-fluid">
+              <div class="row">
+                  <div class="col-lg-12">
+                      <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                          <div>
+                              <h4 class="mb-3">Returns List</h4>
+                              <p class="mb-0">Returns dashboard shows the graphical representation of the channel
+                               and Reference <br>wise returns with the comparison to the total units sold..</p>
+                          </div>
+                          <form action="/shipper/shipping" method="get">
+                              <div class="form-group">
+                                  <select name="status" class="selectpicker form-control" data-style="py-0" onchange="this.form.submit()">
+                                      <option value="">All</option>
+                                      <option th:each="statusOption : ${orderStatusNew}"
+                                              th:value="${statusOption}"
+                                              th:text="${statusOption}"
+                                              th:selected="${statusOption == currentStatus}">
+                                      </option>
+                                  </select>
+                              </div>
+                          </form>
+
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <div class="table-responsive rounded mb-3">
+                      <table class="data-table table mb-0 tbl-server-info">
+                          <thead class="bg-white text-uppercase">
+                              <tr class="ligth ligth-data">
+                                  <th>
+                                      <div class="checkbox d-inline-block">
+                                          <input type="checkbox" class="checkbox-input" id="checkbox1">
+                                          <label for="checkbox1" class="mb-0"></label>
+                                      </div>
+                                  </th>
+                                  <th class="col-md-2">Customer name</th>
+                                  <th>Payment method</th>
+                                  <th>Total price</th>
+                                  <th>Status</th>
+                                  <th>Shipping address</th>
+                                  <th>Action</th>
+                              </tr>
+                          </thead>
+                          <tbody class="ligth-body">
+                              <tr th:each="order :${orderReponses}">
+                                  <td>
+                                      <div class="checkbox d-inline-block">
+                                          <input type="checkbox" class="checkbox-input" id="checkbox2">
+                                          <label for="checkbox2" class="mb-0"></label>
+                                      </div>
+                                  </td>
+                                  <td th:text="${order.customerName}"></td>
+                                  <td th:text="${order.paymentName}"></td>
+                                  <td th:text="${order.totalPrice}"></td>
+                                  <td>
+                                      <span class="badges bg-lightpurple"
+                                            th:if="${order.getStatus().equals(orderStatus[1])}">Shipping
+                                            </span>
+                                      <span class="badges bg-lightgreen"
+                                            th:if="${order.getStatus().equals(orderStatus[2])}">Delivered
+                                            </span>
+                                      <span class="badges bg-lightred"
+                                            th:if="${order.getStatus().equals(orderStatus[3])}">Cancelled
+                                            </span>
+                                  </td>
+                                  <td>
+                                      <span th:text="|${order.shippingAddress.getDetailLocation()}, ${order.shippingAddress.getStreet()}, ${order.shippingAddress.getDistrict()}, ${order.shippingAddress.getCity()}|"></span>
+                                  </td>
+                                  <td>
+                                      <div class="d-flex align-items-center list-action">
+                                          <a class="badge badge-info mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="View"
+                                              th:href="@{/shipper/shipping/{id}(id=${order.orderId})}"><i class="ri-eye-line mr-0"></i></a>
+                                      </div>
+                                  </td>
+                              </tr>
+                          </tbody>
+                      </table>
+                      </div>
+                  </div>
+              </div>
+              <!-- Page end  -->
+            </div>
+    <!-- Modal Edit -->
+        </div>
+    <!-- Wrapper End-->
+        <div th:insert="~{/shipper/fragments/footer::footer}"></div>
+        <!-- Backend Bundle JavaScript -->
+        <div th:insert="~{/shipper/fragments/script::script}"></div>
+
+        </div>
+  </body>
+</html>

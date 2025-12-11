@@ -1,0 +1,705 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{page.title_shop}">TechShop || Shop</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+    <link rel="stylesheet"
+          th:href="@{/user/customize/css/main.css}"/>
+
+    <style>
+        .shop-submenu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Style cho mỗi tùy chọn RAM */
+        .ram-option {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        /* Khi chọn, hiển thị màu xanh */
+        .ram-option.selected {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+
+
+<body class="sticky-header">
+<!-- Start Header -->
+<div th:insert="~{user/fragments/header::header}"></div>
+<!-- End Header -->
+
+<main class="main-wrapper">
+    <!-- Start Breadcrumb Area  -->
+    <div class="axil-breadcrumb-area">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="inner">
+                        <ul class="axil-breadcrumb">
+                            <li class="axil-breadcrumb-item"><a th:href="@{/user/dashboard}" th:text="#{nav.home}">Home</a></li>
+                            <li class="separator"></li>
+                            <li class="axil-breadcrumb-item active" aria-current="page" th:text="#{shop.title}">Explore All Products</li>
+                        </ul>
+                        <h1 class="title" th:text="#{shop.title}">Explore All Products</h1>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-4">
+                    <div class="inner">
+                        <div class="bradcrumb-thumb">
+                            <img th:src="@{/user/assets/images/product/product-45.png}" th:alt="#{shop.image_alt}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Breadcrumb Area  -->
+
+    <!-- Start Shop Area  -->
+    <div class="axil-shop-area axil-section-gap bg-color-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <form action="/user/products" method="get" id="filterForm">
+                        <div class="axil-shop-sidebar">
+                            <div class="d-lg-none">
+                                <button class="sidebar-close filter-close-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                            <button type="submit" class="axil-btn btn-outline-primary" id="filterButton" th:text="#{shop.filter}">Filter</button>
+                            <br><br>
+
+                            <!-- Search Input -->
+                            <input class="form-control mr-sm-2" type="search" th:placeholder="#{search.placeholder}" name="name" style="font-size: 12px;" aria-label="Search" th:value="${param.name}">
+                            <br>
+
+                            <!-- Start Categories -->
+                            <div class="toggle-list product-categories product-gender active">
+                                <h6 class="title" th:text="#{shop.category}">Category</h6>
+                                <div class="shop-submenu">
+                                    <ul>
+                                        <li th:each="category : ${categories}">
+                                            <input type="radio" th:id="'category-' + ${category.name}" name="categoryName"
+                                                   th:value="${category.name}"
+                                                   th:checked="${param.categoryName != null ? #strings.equals(param.categoryName, category.name) : false}"/>
+                                            <label th:for="'category-' + ${category.name}" th:text="${category.name}"></label>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- End Categories -->
+
+                            <!-- Start Brand -->
+                            <div class="toggle-list product-categories product-gender active">
+                                <h6 class="title" th:text="#{shop.brand}">Brand</h6>
+                                <div class="shop-submenu">
+                                    <ul>
+                                        <li th:each="brand : ${brands}">
+                                            <input type="checkbox" th:id="'brand-' + ${brand.name}" class="brand-checkbox" th:value="${brand.name}"/>
+                                            <label th:for="'brand-' + ${brand.name}" th:text="${brand.name}"></label>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- End Brand -->
+
+                            <!-- Start RAM -->
+                            <div class="toggle-list product-size active">
+                                <h6 class="title" th:text="#{shop.ram}">RAM</h6>
+                                <div class="shop-submenu">
+                                    <ul>
+                                        <li class="ram-option" data-value="4GB">4GB</li>
+                                        <li class="ram-option" data-value="6GB">6GB</li>
+                                        <li class="ram-option" data-value="8GB">8GB</li>
+                                        <li class="ram-option" data-value="16GB">16GB</li>
+                                        <li class="ram-option" data-value="32GB">32GB</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- End RAM -->
+
+                            <!-- Hidden inputs to store the selected values -->
+                            <input type="hidden" name="categoryName" id="categoryName">
+                            <input type="hidden" name="brandNames" id="brandNames">
+                            <input type="hidden" name="rams" id="rams">
+                            <input type="hidden" name="minPrice" id="minPrice" value="0">
+                            <input type="hidden" name="maxPrice" id="maxPrice" value="100000000">
+
+                            <!-- Start Price -->
+                            <div class="toggle-list product-price-range active">
+                                <h6 class="title" th:text="#{shop.price}">PRICE</h6>
+                                <div class="shop-submenu">
+                                    <div id="slider-range"></div>
+                                    <div class="flex-center mt--20">
+                                        <span class="input-range" th:text="#{shop.price_label}">Price: </span>
+                                        <input type="text" id="amount" class="amount-range" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="reset" class="axil-btn btn-bg-primary" onclick="window.location.href='/user/products';" th:text="#{shop.reset_all}">All Reset</button>
+                        </div>
+                    </form>
+                    <!-- End .axil-shop-sidebar -->
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="axil-shop-top mb--40">
+                                <div class="category-select align-items-center justify-content-lg-end justify-content-between">
+                                    <!-- Start Single Select  -->
+                                    <span class="filter-results" th:text="${showingInfo}"></span>
+                                    <select class="single-select" onchange="window.location.href=this.value;">
+                                        <option th:selected="${sortBy == 'price' && sortOrder == 'asc'}"
+                                                th:value="@{${baseUrl} + '&sortBy=price&sortOrder=asc'}" th:text="#{shop.sort_price_low}">Price: Low to High</option>
+                                        <option th:selected="${sortBy == 'price' && sortOrder == 'desc'}"
+                                                th:value="@{${baseUrl} + '&sortBy=price&sortOrder=desc'}" th:text="#{shop.sort_price_high}">Price: High to Low</option>
+                                        <option th:selected="${sortBy == 'name' && sortOrder == 'asc'}"
+                                                th:value="@{${baseUrl} + '&sortBy=name&sortOrder=asc'}" th:text="#{shop.sort_name_asc}">Name: A -> Z</option>
+                                        <option th:selected="${sortBy == 'name' && sortOrder == 'desc'}"
+                                                th:value="@{${baseUrl} + '&sortBy=name&sortOrder=desc'}" th:text="#{shop.sort_name_desc}">Name: Z -> A</option>
+                                    </select>
+                                    <!-- End Single Select  -->
+                                </div>
+                                <div class="d-lg-none">
+                                    <button class="product-filter-mobile filter-toggle"><i class="fas fa-filter"></i>
+                                        <span th:text="#{shop.filter}">FILTER</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End .row -->
+                    <div class="row row--15">
+                        <!-- Start Single Product  -->
+                        <div class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30"
+                             th:each="product:${products}">
+                            <div class="axil-product product-style-one">
+                                <div class="thumbnail" style="height: 180px;">
+                                    <a th:href="@{/user/products/product-detail/{id}(id=${product.id})}">
+                                        <img data-sal="fade" data-sal-delay="100" data-sal-duration="1500"
+                                             th:if="${product.isUrlImage()}"
+                                             th:src="${product.thumbnail}"
+                                             class="product-image"
+                                             th:alt="#{product.image_alt}"/>
+                                        <img data-sal="fade" data-sal-delay="100" data-sal-duration="1500"
+                                             th:unless="${product.isUrlImage()}"
+                                             th:src="@{'/uploads/'+${product.thumbnail}}"
+                                             class="product-image"
+                                             th:alt="#{product.image_alt}"/>
+                                    </a>
+                                    <div class="label-block label-right">
+                                        <div class="product-badget" th:text="#{product.discount}">20% Off</div>
+                                    </div>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview" th:value="${product.id}">
+                                                <a href="#" data-bs-toggle="modal" data-bs-target="#quick-view-modal"><i
+                                                        class="far fa-eye"></i></a>
+                                            </li>
+                                            <li class="select-option">
+                                                <form th:action="@{/user/cart/cart-add}" method="post"
+                                                      class="cart-action">
+                                                    <input type="hidden" name="productId" th:value="${product.id}"/>
+                                                    <input type="hidden" name="quantity" value="1"/>
+                                                    <li class="select-option">
+                                                        <button type="submit" class="add-to-cart-btn" th:text="#{products.add_to_cart_short}">Add</button>
+                                                    </li>
+                                                </form>
+                                            </li>
+                                            <li class="wishlist" th:attr="data-product-id=${product.id}">
+                                                <form th:action="@{/user/wishlist/insert}" method="post" class="wishlist-form">
+                                                    <input type="hidden" name="wishlistId" th:value="${session.wishlistId}">
+                                                    <input type="hidden" name="productId" th:value="${product.id}">
+                                                    <button type="submit" class="wishlist-btn"
+                                                            th:classappend="${wishedProductIds.contains(product.id) ? 'active' : ''}">
+                                                        <i th:class="${wishedProductIds.contains(product.id) ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <div class="inner">
+                                        <h5 class="title">
+                                            <a th:href="@{/user/products/product-detail/{id}(id=${product.id})}"
+                                               th:text="${product.name}"></a>
+                                        </h5>
+                                        <div class="product-price-variant product-price-variant-shop">
+                                            <span class="price current-price" th:text="${product.price}"></span>
+                                            <span class="price old-price" th:text="${product.oldPrice}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Single Product  -->
+
+                    </div>
+
+                    <input type="hidden" id="totalPages" th:value="${totalPages}">
+                    <div th:if="${totalPages == 0}" id="error-notification" style="display: none;">
+                        <div class="empty-notification">
+                            <img th:src="@{/user/assets/images/my-image/no-data.svg}" th:alt="#{shop.no_data_alt}">
+                            <p th:text="#{shop.no_data}">No data to show!</p>
+                        </div>
+                    </div>
+                    <div class="custom-pagination">
+                        <ul>
+                            <!-- Nút "Trang Trước" -->
+                            <li th:if="${currentPage > 0}">
+                                <a style="padding: 0 40px;" th:href="@{${baseUrl} + 'pageNumber=' + (${currentPage - 1}) + '&pageSize=' + ${pageSize} + '&sortBy=' + ${sortBy} + '&sortOrder=' + ${sortOrder}}"
+                                   class="prev" th:text="#{pagination.previous}">Previous</a>
+                            </li>
+
+                            <!-- Hiển thị số trang -->
+                            <li th:if="${totalPages > 0}"
+                                th:each="index : ${#numbers.sequence(0, totalPages - 1)}">
+                                <a th:href="@{${baseUrl} + 'pageNumber=' + ${index} + '&pageSize=' + ${pageSize} + '&sortBy=' + ${sortBy} + '&sortOrder=' + ${sortOrder}}"
+                                   th:text="${index + 1}"
+                                   th:classappend="${index == currentPage} ? 'active' : '' "
+                                   class="page"></a>
+                            </li>
+
+                            <!-- Nút "Trang Sau" -->
+                            <li th:if="${currentPage < totalPages - 1}">
+                                <a th:href="@{${baseUrl} + 'pageNumber=' + (${currentPage + 1}) + '&pageSize=' + ${pageSize} + '&sortBy=' + ${sortBy} + '&sortOrder=' + ${sortOrder}}"
+                                   class="next" th:text="#{pagination.next}">Next</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End .container -->
+    </div>
+    <!-- End Shop Area  -->
+
+    <!-- Quick View Modal -->
+    <div class="modal fade" id="quick-view-modal" tabindex="-1" aria-labelledby="quick-view-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quick-view-modal-label" th:text="#{modal.product_details}">Chi tiết sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="product-details">
+                        <p><strong th:text="#{modal.product_name}">Tên sản phẩm:</strong> <span id="product-name"></span></p>
+                        <p><strong th:text="#{modal.price}">Giá:</strong> <span id="product-price"></span></p>
+                        <p><strong th:text="#{modal.old_price}">Giá cũ:</strong> <span id="product-old-price"></span></p>
+                        <p><strong th:text="#{modal.details}">Chi tiết:</strong> <span id="product-description"></span></p>
+                        <p><strong th:text="#{modal.ratings}">Số lượt đánh giá:</strong> <span id="product-feedback"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{modal.close}">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Axil Newsletter Area  -->
+    <div th:insert="~{/user/fragments/newsletter::newsletter}"></div>
+    <!-- End Axil Newsletter Area  -->
+</main>
+
+<div th:insert="~{/user/fragments/service-area-footer::service-area-footer}"></div>
+<!-- Start Footer Area  -->
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- Product Quick View Modal Start -->
+<div th:insert="~{/user/fragments/quickview::quick-view}"></div>
+<!-- Product Quick View Modal End -->
+
+<!-- Header Search Modal End -->
+<div th:insert="~{/user/fragments/header-search::header-search}"></div>
+<!-- Header Search Modal End -->
+
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                                  th:text="${cartDetail.productName}"></a></h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+                <a th:href="@{/user/checkout}" class="axil-btn btn-bg-secondary checkout-btn" th:text="#{cart.checkout}">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS
+============================================ -->
+<!-- Modernizer JS -->
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<!-- JavaScript code giữ nguyên hoàn toàn -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalPages = parseInt(document.getElementById('totalPages').value, 10);
+        if (totalPages == 0) {
+            document.getElementById('error-notification').style.display = 'block';
+        }
+    });
+
+    // ===== WISHLIST FORM SUBMIT =====
+    document.querySelectorAll('.wishlist-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const actionUrl = this.getAttribute('action');
+
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    toast.warning('Please login to add to wishlist!');
+                    setTimeout(() => {
+                        const currentPath = window.location.pathname;
+                        window.location.href = '/login?redirect=' + encodeURIComponent(currentPath);
+                    }, 3000);
+                    return Promise.reject('redirect_to_login');
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.success !== undefined) {
+                    let countEl = document.querySelector('.wishlist .cart-count');
+                    if (!countEl) {
+                        const wishlistEl = document.querySelector('.wishlist a');
+                        countEl = document.createElement('p');
+                        countEl.classList.add('cart-count');
+                        wishlistEl.prepend(countEl);
+                    }
+                    countEl.textContent = data.wishlistCount;
+                    countEl.style.display = data.wishlistCount > 0 ? "block" : "none";
+
+                    if (data.success) {
+                        const productId = form.querySelector('input[name="productId"]').value;
+                        const btn = document.querySelector(`.wishlist[data-product-id="${productId}"] .wishlist-btn`);
+                        if (btn) {
+                            btn.classList.add('active');
+                            const icon = btn.querySelector('i');
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        }
+                        toast.success('Added to wishlist!');
+                    } else {
+                        toast.warning('Product is already in wishlist!');
+                    }
+                } else {
+                    console.warn("Unexpected response:", data);
+                }
+            })
+            .catch(err => {
+                if (err !== 'redirect_to_login') {
+                    console.error("Error:", err);
+                    toast.error('An error occurred, please try again!');
+                }
+            });
+        });
+    });
+
+    $(document).ready(function(){
+        $('.slick-slider').slick({
+            slidesToShow: 4,
+            slidesToScroll: 1,
+            infinite: true,
+            dots: true,
+            responsive: [
+                {
+                    breakpoint: 1024,
+                    settings: {
+                        slidesToShow: 3
+                    }
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 2
+                    }
+                },
+                {
+                    breakpoint: 480,
+                    settings: {
+                        slidesToShow: 1
+                    }
+                }
+            ]
+        });
+    });
+
+    $(document).on('click', '.quickview a', function (event) {
+        event.preventDefault();
+
+        const productId = $(this).closest('li').attr('value');
+
+        $.ajax({
+            url: '/user/products/quick-view',
+            type: 'GET',
+            data: { id: productId },
+            success: function (data) {
+                if (data) {
+                    $('#product-name').text(data.name);
+                    $('#product-price').text(data.price);
+                    $('#product-old-price').text(data.oldPrice);
+                    $('#product-feedback').text(data.ratings);
+                    $('#product-description').text(data.description || 'No description available');
+                    $('#quick-view-modal').modal('show');
+                } else {
+                    toast.error('Product information not found!');
+                }
+            },
+            error: function () {
+                toast.error('Error loading product data!');
+            }
+        });
+    });
+
+    document.getElementById('filterForm').addEventListener('submit', function(event) {
+        let selectedBrands = [];
+        document.querySelectorAll('.brand-checkbox:checked').forEach(function (checkbox) {
+            selectedBrands.push(checkbox.value);
+        });
+
+        let selectedRAMs = [];
+        document.querySelectorAll('.ram-option.selected').forEach(function (ramOption) {
+            selectedRAMs.push(ramOption.getAttribute('data-value'));
+        });
+
+        let searchValue = document.querySelector('input[name="name"]').value;
+        if (searchValue) {
+            document.getElementById('name').value = searchValue;
+        }
+
+        let selectedCategory = document.querySelector('input[name="categoryName"]:checked');
+        if (selectedCategory) {
+            document.getElementById('categoryName').value = selectedCategory.value;
+        }
+
+        if (selectedBrands.length > 0) {
+            document.getElementById('brandNames').value = selectedBrands.join(',');
+        }
+
+        if (selectedRAMs.length > 0) {
+            document.getElementById('rams').value = selectedRAMs.join(',');
+        }
+    });
+
+    function updateUIAfterFilter() {
+        let urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.has('name')) {
+            let searchValue = urlParams.get('name');
+            document.querySelector('input[name="name"]').value = searchValue;
+        }
+
+        if (urlParams.has('categoryName')) {
+            let category = urlParams.get('categoryName');
+            let categoryRadio = document.querySelector(`input[name="categoryName"][value="${category}"]`);
+            if (categoryRadio) {
+                categoryRadio.checked = true;
+            }
+        }
+
+        if (urlParams.has('brandNames')) {
+            let brands = urlParams.get('brandNames').split(',');
+            brands.forEach(function (brand) {
+                let checkbox = document.querySelector(`#brand-${brand}`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        if (urlParams.has('rams')) {
+            let rams = urlParams.get('rams').split(',');
+            rams.forEach(function (ram) {
+                let ramElement = document.querySelector(`[data-value="${ram}"]`);
+                if (ramElement) {
+                    ramElement.classList.add('selected');
+                }
+            });
+        }
+    }
+
+    updateUIAfterFilter();
+
+    document.querySelectorAll('.ram-option').forEach(function(ramElement) {
+        ramElement.addEventListener('click', function() {
+            ramElement.classList.toggle('selected');
+        });
+    });
+
+    $(document).ready(function() {
+        let defaultMinPrice = 0;
+        let defaultMaxPrice = 100000000;
+
+        $('#slider-range').slider({
+            range: true,
+            min: 0,
+            max: 100000000,
+            values: [0, 100000000],
+            slide: function(event, ui) {
+                $('#amount').val(
+                    ui.values[0].toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}).replace('VND', '') + 'đ' +
+                    ' - ' +
+                    ui.values[1].toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}).replace('VND', '') + 'đ'
+                );
+
+                $('#minPrice').val(ui.values[0]);
+                $('#maxPrice').val(ui.values[1]);
+            }
+        });
+
+        $('#amount').val(
+            $('#slider-range').slider('values', 0).toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}).replace('VND', '') + 'đ' +
+            ' - ' +
+            $('#slider-range').slider('values', 1).toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}).replace('VND', '') + 'đ'
+        );
+
+        function updateSliderFromUrl() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let minPrice = urlParams.get('minPrice') || defaultMinPrice;
+            let maxPrice = urlParams.get('maxPrice') || defaultMaxPrice;
+
+            $('#slider-range').slider('values', [minPrice, maxPrice]);
+
+            $('#amount').val(
+                $('#slider-range').slider('values', 0).toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}).replace('VND', '') + 'đ' +
+                ' - ' +
+                $('#slider-range').slider('values', 1).toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}).replace('VND', '') + 'đ'
+            );
+
+            $('#minPrice').val(minPrice);
+            $('#maxPrice').val(maxPrice);
+        }
+
+        updateSliderFromUrl();
+
+        $('#filterForm').on('submit', function(event) {
+            let selectedBrands = [];
+            $('.brand-checkbox:checked').each(function() {
+                selectedBrands.push($(this).val());
+            });
+
+            let selectedRAMs = [];
+            $('.ram-option.selected').each(function() {
+                selectedRAMs.push($(this).data('value'));
+            });
+
+            let searchValue = $('input[name="name"]').val();
+            $('#name').val(searchValue);
+
+            let selectedCategory = $('input[name="categoryName"]:checked').val();
+            $('#categoryName').val(selectedCategory);
+
+            $('#brandNames').val(selectedBrands.join(','));
+            $('#rams').val(selectedRAMs.join(','));
+
+            let urlParams = new URLSearchParams(window.location.search);
+
+            if (selectedCategory) {
+                urlParams.set('categoryName', selectedCategory);
+            } else {
+                urlParams.delete('categoryName');
+            }
+
+            if (selectedBrands.length > 0) {
+                urlParams.set('brandNames', selectedBrands.join(','));
+            } else {
+                urlParams.delete('brandNames');
+            }
+
+            if (searchValue) {
+                urlParams.set('name', searchValue);
+            } else {
+                urlParams.delete('name');
+            }
+
+            if (selectedRAMs.length > 0) {
+                urlParams.set('rams', selectedRAMs.join(','));
+            } else {
+                urlParams.delete('rams');
+            }
+
+            let minPrice = $('#minPrice').val();
+            let maxPrice = $('#maxPrice').val();
+
+            if (minPrice && maxPrice) {
+                urlParams.set('minPrice', minPrice);
+                urlParams.set('maxPrice', maxPrice);
+            } else {
+                urlParams.delete('minPrice');
+                urlParams.delete('maxPrice');
+            }
+
+            urlParams.delete('pageNumber');
+            urlParams.delete('pageSize');
+            urlParams.delete('sortBy');
+            urlParams.delete('sortOrder');
+
+            window.location.search = urlParams.toString();
+
+            event.preventDefault();
+        });
+    });
+</script>
+</body>
+</html>

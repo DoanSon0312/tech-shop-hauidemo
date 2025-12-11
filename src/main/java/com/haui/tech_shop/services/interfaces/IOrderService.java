@@ -1,0 +1,79 @@
+package com.haui.tech_shop.services.interfaces;
+
+import com.haui.tech_shop.dtos.responses.CartDetailResponse;
+import com.haui.tech_shop.dtos.responses.OrderReponse;
+import com.haui.tech_shop.entities.*;
+import com.haui.tech_shop.enums.OrderStatus;
+import org.springframework.data.domain.Sort;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public interface IOrderService {
+    List<Order> findByUsername(String username);
+
+    void orderPending(Long id);
+
+    void orderCancelled(Long id);
+
+    void orderDelivered(Long id);
+
+    void orderShipping(Long id, Long shipperId);
+    void orderRefund(Long id);
+    void orderCompleted(Long id);
+
+    void createOrder(User user, BigDecimal totalPrice, Voucher voucher, Payment payment, Address address,
+                     Long cartId,
+                     List<CartDetailResponse> cartDetailList);
+
+    Order createOrder(User user, BigDecimal totalPrice, Payment payment, Address address,
+                        Long cartId,
+                        List<CartDetailResponse> cartDetailList);
+
+    void deleteAll();
+
+    List<Order> findAll();
+
+    <S extends Order> S save(S entity);
+
+    Optional<Order> findById(Long aLong);
+
+    boolean existsById(Long aLong);
+
+    long count();
+
+    boolean deleteById(Long aLong);
+
+    List<Order> findAll(Sort sort);
+    List<OrderReponse> findOrderByShipperNameAndStatus(Long shipperId, OrderStatus orderStatus);
+    List<OrderReponse> findAllByShipperId(Long shipperId);
+
+    OrderReponse findByOrderId(Long id);
+    List<Order> ordersByYearAndMonthForShipper(int year, int month, Long shipperId);
+    List<Order> totalPriceByYearAndMonthForShipper(int year, int month, Long shipperId);
+    BigDecimal getTotalPurchaseDueForDeliveredOrders();
+    int getTotalProductsSold();
+    int getTotalOrder();
+    int getTotalOrderForShipping();
+
+    int getTotalOrderDelivered();
+
+    int getTotalOrderCancelled();
+
+    int getTotalOrderShipping();
+
+    List<Order> getRecentlyOrders();
+
+    void deleteFailOrder();
+    Optional<Order> findOrderByIdWithDetails(Long orderId);
+    Order createOrderWithVoucher(User user, BigDecimal totalPrice, Voucher voucher,
+                                 Payment payment, Address address, Long cartId,
+                                 List<CartDetailResponse> cartDetailList);
+
+    Map<String, Object> getSalesRevenueDataLast7Days();
+    Map<String, Object> getOrderStatusStatistics();
+    Map<String, Object> getMonthlyRevenueData();
+
+}

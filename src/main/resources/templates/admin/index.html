@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Dashboard - TechShop Admin</title>
+
+  <link th:href="@{/admin/assets/img/favicon.png}" rel="icon">
+  <link th:href="@{/admin/assets/img/apple-touch-icon.png}" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <link th:href="@{/admin/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/boxicons/css/boxicons.min.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/quill/quill.snow.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/quill/quill.bubble.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/remixicon/remixicon.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/simple-datatables/style.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/css/style.css}" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="loading-spinner" id="loadingSpinner">
+  <div class="spinner-container">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<div th:replace="~{admin/fragments/header::admin-header}"></div>
+<div th:replace="~{admin/fragments/sidebar::admin-sidebar}"></div>
+
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section dashboard">
+    <div class="row">
+
+      <!-- Statistics Cards -->
+      <div class="col-12">
+        <div class="row">
+          <div class="col-xxl-3 col-md-6 mb-4">
+            <div class="card info-card sales-card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Total Orders <span>| Overall</span></h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-cart"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 th:text="${totalOrders != null ? totalOrders : 0}">0</h6>
+                    <span class="text-success small pt-1 fw-bold">Pending: </span>
+                    <span class="text-muted small pt-2 ps-1" th:text="${totalOrdersPending != null ? totalOrdersPending : 0}">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-3 col-md-6 mb-4">
+            <div class="card info-card revenue-card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Revenue <span>| Delivered</span></h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-currency-dollar"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 th:text="${totalPurchaseDue != null ? '$' + #numbers.formatDecimal(totalPurchaseDue, 1, 'COMMA', 2, 'POINT') : '$0'}">$0</h6>
+                    <span class="text-success small pt-1 fw-bold">Vouchers: </span>
+                    <span class="text-muted small pt-2 ps-1" th:text="${totalAvailableVouchers != null ? totalAvailableVouchers : 0}">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-3 col-md-6 mb-4">
+            <div class="card info-card customers-card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Users <span>| Total</span></h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-people"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 th:text="${userCount != null ? userCount : 0}">0</h6>
+                    <span class="text-danger small pt-1 fw-bold">Shippers: </span>
+                    <span class="text-muted small pt-2 ps-1" th:text="${shipperCount != null ? shipperCount : 0}">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-3 col-md-6 mb-4">
+            <div class="card info-card sales-card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Products <span>| Stock & Sold</span></h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-box-seam"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 th:text="${totalProducts != null ? totalProducts : 0}">0</h6>
+                    <span class="text-success small pt-1 fw-bold">Sold: </span>
+                    <span class="text-muted small pt-2 ps-1" th:text="${totalProductsSold != null ? totalProductsSold : 0}">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left Column - Charts -->
+      <div class="col-lg-8">
+        <div class="row">
+
+          <!-- Sales & Revenue Chart -->
+          <div class="col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Sales & Revenue Report <span>| Last 7 Days</span></h5>
+                <div id="salesRevenueChart" style="min-height: 350px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly Revenue Chart -->
+          <div class="col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Monthly Revenue <span>| This Year</span></h5>
+                <div id="monthlyRevenueChart" style="min-height: 350px;"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Column - Charts & Tables -->
+      <div class="col-lg-4">
+
+        <!-- Order Status Chart -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Order Status</h5>
+            <div id="orderStatusChart" style="min-height: 300px;"></div>
+          </div>
+        </div>
+
+        <!-- Top Selling Categories Chart -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Top Selling Categories</h5>
+            <div id="categoryChart" style="min-height: 300px;"></div>
+            <div class="mt-3" id="categoryStats" style="display: none;">
+              <small class="text-muted">Category Statistics</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Selling Products -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Top Selling Products</h5>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-light">
+                <tr>
+                  <th scope="col">Product</th>
+                  <th scope="col" width="100">Price</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${top4Products}">
+                  <td>
+                    <div class="fw-bold text-truncate" style="max-width: 150px;" th:text="${product.name}">Product Name</div>
+                    <small class="text-muted" th:text="${product.category?.name ?: 'No Category'}">Category</small>
+                  </td>
+                  <td class="fw-bold text-success" th:text="${'$' + #numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(top4Products)}">
+                  <td colspan="2" class="text-center text-muted">No products available</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="footer" class="footer">
+  <div class="copyright">
+    &copy; Copyright <strong><span>TechShop</span></strong>. All Rights Reserved
+  </div>
+</footer>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+  <i class="bi bi-arrow-up-short"></i>
+</a>
+
+<script th:src="@{/admin/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.js"></script>-->
+<script th:src="@{/admin/assets/vendor/apexcharts/apexcharts.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/simple-datatables/simple-datatables.js}"></script>
+<script th:src="@{/admin/assets/js/main.js}"></script>
+
+<script th:inline="javascript">
+
+            document.addEventListener("DOMContentLoaded", function() {
+            console.log('Dashboard initializing - Loading data from backend...');
+
+            // Hiển thị loading spinner
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const mainContent = document.getElementById('main');
+
+            if (mainContent) {
+              mainContent.classList.add('main-loading');
+            }
+
+            // Lấy dữ liệu từ backend thông qua Thymeleaf
+            const rawSalesRevenueData = /*[[${salesRevenueData}]]*/ null;
+            const rawOrderStatusData = /*[[${orderStatusData}]]*/ null;
+            const rawMonthlyRevenueData = /*[[${monthlyRevenueData}]]*/ null;
+            const rawCategoryDistribution = /*[[${categoryDistribution}]]*/ null;
+
+            console.log('Raw data from backend:', {
+              rawSalesRevenueData,
+              rawOrderStatusData,
+              rawMonthlyRevenueData,
+              rawCategoryDistribution
+            });
+
+            // ========== 1. Sales & Revenue Chart Data ==========
+            let salesCount = [0, 0, 0, 0, 0, 0, 0];
+            let revenueData = [0, 0, 0, 0, 0, 0, 0];
+            let dates = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+            if (rawSalesRevenueData && rawSalesRevenueData.salesCount && rawSalesRevenueData.revenue && rawSalesRevenueData.dates) {
+              salesCount = rawSalesRevenueData.salesCount;
+              revenueData = rawSalesRevenueData.revenue;
+
+              // Format dates
+              dates = rawSalesRevenueData.dates.map(dateStr => {
+                try {
+                  const date = new Date(dateStr);
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                } catch (e) {
+                  return dateStr;
+                }
+              });
+            }
+            console.log('Sales & Revenue:', { salesCount, revenueData, dates });
+
+            // ========== 2. Monthly Revenue Chart Data ==========
+            let monthlyRevenue = [];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            if (rawMonthlyRevenueData && rawMonthlyRevenueData.revenue) {
+              monthlyRevenue = rawMonthlyRevenueData.revenue;
+              // Đảm bảo có đủ 12 tháng
+              while (monthlyRevenue.length < 12) {
+                monthlyRevenue.push(0);
+              }
+            } else {
+              monthlyRevenue = new Array(12).fill(0);
+            }
+            console.log('Monthly Revenue:', monthlyRevenue);
+
+            // ========== 3. Order Status Chart Data ==========
+            let orderStatusSeries = [];
+            let orderStatusLabels = [];
+            let orderStatusColors = ['#2eca6a', '#ff771d', '#4154f1', '#ff0000', '#ffc107'];
+
+            if (rawOrderStatusData && rawOrderStatusData.counts && rawOrderStatusData.statuses) {
+              orderStatusSeries = rawOrderStatusData.counts;
+              orderStatusLabels = rawOrderStatusData.statuses;
+
+              if (rawOrderStatusData.colors && rawOrderStatusData.colors.length > 0) {
+                orderStatusColors = rawOrderStatusData.colors;
+              }
+            } else {
+              orderStatusSeries = [0];
+              orderStatusLabels = ['No Data'];
+              orderStatusColors = ['#6c757d'];
+            }
+            console.log('Order Status:', { orderStatusSeries, orderStatusLabels, orderStatusColors });
+
+            // ========== 4. Category Distribution Chart Data ==========
+            let categorySeries = [];
+            let categoryLabels = [];
+            let categoryColors = ['#4154f1', '#2eca6a', '#ff771d', '#ffc107', '#6c757d', '#e83e8c', '#20c997'];
+
+            if (rawCategoryDistribution && rawCategoryDistribution.counts && rawCategoryDistribution.categories) {
+              categorySeries = rawCategoryDistribution.counts;
+              categoryLabels = rawCategoryDistribution.categories;
+
+              if (rawCategoryDistribution.colors && rawCategoryDistribution.colors.length > 0) {
+                categoryColors = rawCategoryDistribution.colors;
+              }
+            } else {
+              categorySeries = [0];
+              categoryLabels = ['No Data'];
+              categoryColors = ['#6c757d'];
+            }
+            console.log('Category Distribution:', { categorySeries, categoryLabels, categoryColors });
+
+            // Thêm delay nhỏ để đảm bảo các phần tử đã được render
+            setTimeout(() => {
+              // ========== Render All Charts ==========
+              renderCharts(
+                salesCount, revenueData, dates,
+                monthlyRevenue, months,
+                orderStatusSeries, orderStatusLabels, orderStatusColors,
+                categorySeries, categoryLabels, categoryColors
+              );
+
+              // Ẩn loading spinner sau khi tất cả chart đã render
+              hideLoadingSpinner();
+            }, 2500);
+          });
+
+          function hideLoadingSpinner() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const mainContent = document.getElementById('main');
+
+            if (loadingSpinner) {
+              // Thêm class hidden để ẩn spinner với hiệu ứng
+              loadingSpinner.classList.add('hidden');
+
+              // Xóa spinner khỏi DOM sau khi animation kết thúc
+              setTimeout(() => {
+                if (loadingSpinner.parentNode) {
+                  loadingSpinner.parentNode.removeChild(loadingSpinner);
+                }
+              }, 2500);
+            }
+
+            if (mainContent) {
+              mainContent.classList.remove('main-loading');
+            }
+
+            console.log('✓ Loading spinner hidden');
+          }
+
+          function renderCharts(salesCount, revenueData, dates, monthlyRevenue, months,
+                               orderStatusSeries, orderStatusLabels, orderStatusColors,
+                               categorySeries, categoryLabels, categoryColors) {
+
+            let chartsRendered = 0;
+            const totalCharts = 4;
+
+            function checkAllChartsRendered() {
+              chartsRendered++;
+              console.log(`✓ Chart ${chartsRendered}/${totalCharts} rendered`);
+
+              if (chartsRendered === totalCharts) {
+                console.log('All charts rendering completed');
+                // Có thể thêm một delay nhỏ trước khi ẩn loading để đảm bảo UX mượt mà
+                setTimeout(hideLoadingSpinner, 300);
+              }
+            }
+
+            // ========== 1. Sales & Revenue Chart ==========
+            if (document.getElementById("salesRevenueChart")) {
+              try {
+                const salesChart = new ApexCharts(document.querySelector("#salesRevenueChart"), {
+                  series: [
+                    { name: 'Sales Count', type: 'line', data: salesCount },
+                    { name: 'Revenue ($)', type: 'line', data: revenueData }
+                  ],
+                  chart: {
+                    height: 350,
+                    type: 'line',
+                    toolbar: { show: true },
+                    zoom: { enabled: true },
+                    events: {
+                      mounted: function() {
+                        checkAllChartsRendered();
+                      }
+                    }
+                  },
+                  colors: ['#4154f1', '#2eca6a'],
+                  stroke: {
+                    curve: 'smooth',
+                    width: [3, 3]
+                  },
+                  markers: {
+                    size: 5,
+                    hover: { size: 7 }
+                  },
+                  xaxis: {
+                    categories: dates,
+                    title: { text: 'Date' }
+                  },
+                  yaxis: [
+                    {
+                      title: { text: 'Sales Count' },
+                      labels: { formatter: val => Math.round(val) }
+                    },
+                    {
+                      opposite: true,
+                      title: { text: 'Revenue ($)' },
+                      labels: { formatter: val => '$' + val.toFixed(2) }
+                    }
+                  ],
+                  tooltip: {
+                    shared: true,
+                    intersect: false,
+                    y: {
+                      formatter: function(val, opts) {
+                        if (opts.seriesIndex === 1) {
+                          return '$' + val.toFixed(2);
+                        }
+                        return Math.round(val);
+                      }
+                    }
+                  },
+                  legend: {
+                    position: 'top',
+                    horizontalAlign: 'left'
+                  }
+                });
+                salesChart.render();
+              } catch (error) {
+                console.error('✗ Error rendering sales chart:', error);
+                checkAllChartsRendered();
+              }
+            } else {
+              checkAllChartsRendered();
+            }
+
+            // ========== 2. Monthly Revenue Chart ==========
+            if (document.getElementById("monthlyRevenueChart")) {
+              try {
+                const monthlyChart = new ApexCharts(document.querySelector("#monthlyRevenueChart"), {
+                  series: [{
+                    name: 'Revenue',
+                    data: monthlyRevenue
+                  }],
+                  chart: {
+                    type: 'bar',
+                    height: 350,
+                    toolbar: { show: true },
+                    events: {
+                      mounted: function() {
+                        checkAllChartsRendered();
+                      }
+                    }
+                  },
+                  colors: ['#4154f1'],
+                  plotOptions: {
+                    bar: {
+                      borderRadius: 8,
+                      horizontal: false,
+                      columnWidth: '60%'
+                    }
+                  },
+                  dataLabels: {
+                    enabled: false
+                  },
+                  xaxis: {
+                    categories: months,
+                    title: { text: 'Month' }
+                  },
+                  yaxis: {
+                    title: { text: 'Revenue ($)' },
+                    labels: {
+                      formatter: val => '$' + val.toFixed(0)
+                    }
+                  },
+                  tooltip: {
+                    y: {
+                      formatter: val => '$' + val.toFixed(2)
+                    }
+                  }
+                });
+                monthlyChart.render();
+              } catch (error) {
+                console.error('✗ Error rendering monthly revenue chart:', error);
+                checkAllChartsRendered();
+              }
+            } else {
+              checkAllChartsRendered();
+            }
+
+            // ========== 3. Order Status Chart ==========
+            if (document.getElementById("orderStatusChart")) {
+              try {
+                const orderStatusChart = new ApexCharts(document.querySelector("#orderStatusChart"), {
+                  series: orderStatusSeries,
+                  chart: {
+                    type: 'donut',
+                    height: 300,
+                    events: {
+                      mounted: function() {
+                        checkAllChartsRendered();
+                      }
+                    }
+                  },
+                  labels: orderStatusLabels,
+                  colors: orderStatusColors,
+                  legend: {
+                    position: 'bottom',
+                    fontSize: '12px'
+                  },
+                  dataLabels: {
+                    enabled: true,
+                    formatter: function(val, opts) {
+                      return opts.w.config.series[opts.seriesIndex];
+                    }
+                  },
+                  plotOptions: {
+                    pie: {
+                      donut: {
+                        size: '65%',
+                        labels: {
+                          show: true,
+                          total: {
+                            show: true,
+                            label: 'Total Orders',
+                            formatter: function(w) {
+                              return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  responsive: [{
+                    breakpoint: 480,
+                    options: {
+                      chart: { width: 250 },
+                      legend: { position: 'bottom' }
+                    }
+                  }]
+                });
+                orderStatusChart.render();
+              } catch (error) {
+                console.error('✗ Error rendering order status chart:', error);
+                checkAllChartsRendered();
+              }
+            } else {
+              checkAllChartsRendered();
+            }
+
+            // ========== 4. Category Distribution Chart ==========
+            if (document.getElementById("categoryChart")) {
+              try {
+                const categoryChart = new ApexCharts(document.querySelector("#categoryChart"), {
+                  series: categorySeries,
+                  chart: {
+                    type: 'donut',
+                    height: 300,
+                    events: {
+                      mounted: function() {
+                        checkAllChartsRendered();
+                      }
+                    }
+                  },
+                  labels: categoryLabels,
+                  colors: categoryColors,
+                  legend: {
+                    position: 'bottom',
+                    fontSize: '12px'
+                  },
+                  dataLabels: {
+                    enabled: true,
+                    formatter: function(val, opts) {
+                      return opts.w.config.series[opts.seriesIndex];
+                    }
+                  },
+                  plotOptions: {
+                    pie: {
+                      donut: {
+                        size: '65%',
+                        labels: {
+                          show: true,
+                          total: {
+                            show: true,
+                            label: 'Total Sold',
+                            formatter: function(w) {
+                              return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  responsive: [{
+                    breakpoint: 480,
+                    options: {
+                      chart: { width: 250 },
+                      legend: { position: 'bottom' }
+                    }
+                  }]
+                });
+                categoryChart.render();
+              } catch (error) {
+                console.error('✗ Error rendering category chart:', error);
+                checkAllChartsRendered();
+              }
+            } else {
+              checkAllChartsRendered();
+            }
+          }
+</script>
+
+</body>
+</html>

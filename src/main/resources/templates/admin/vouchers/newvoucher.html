@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Voucher Management - AI Powered</title>
+
+    <link th:href="@{/admin/assets/img/favicon.png}" rel="icon">
+    <link th:href="@{/admin/assets/img/apple-touch-icon.png}" rel="apple-touch-icon">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <link th:href="@{/admin/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/vendor/boxicons/css/boxicons.min.css}" rel="stylesheet">
+    <link th:href="@{/admin/assets/css/style.css}" rel="stylesheet">
+
+    <style>
+        .ai-simulation-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .ai-simulation-section h4 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-input-container {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-input-container label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .ai-input-container input {
+            background: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        .ai-input-container input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,215,0,0.3);
+        }
+
+        .btn-ai-simulate {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+            font-weight: 700;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+        }
+
+        .btn-ai-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+            background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+        }
+
+        .btn-ai-simulate:active {
+            transform: translateY(0);
+        }
+
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            color: #333;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .results-section h5 {
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .result-card h6 {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #555;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: #764ba2;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .metric-value.success {
+            color: #28a745;
+        }
+
+        .metric-value.warning {
+            color: #28a745;
+        }
+
+        .metric-value.danger {
+            color: #dc3545;
+        }
+
+        .insight-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .insight-box p {
+            margin: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .voucher-form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{admin/fragments/header::admin-header}"></div>
+<div th:replace="~{admin/fragments/sidebar::admin-sidebar}"></div>
+
+<main id="main" class="main">
+    <div class="page-wrapper">
+        <div class="content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h4 th:text="${voucher.id != null ? 'Voucher Edit' : 'Voucher Add'}"></h4>
+                    <h6 th:text="${voucher.id != null ? 'Edit Voucher with AI Analysis' : 'Create Voucher with AI Campaign Simulator'}"></h6>
+                </div>
+            </div>
+
+            <!-- AI Campaign Simulator -->
+            <div class="ai-simulation-section">
+                <h4>
+                    <i class="bi bi-robot"></i>
+                    AI Campaign Simulator - Dự đoán hiệu quả chiến dịch
+                </h4>
+
+                <div class="ai-input-container">
+                    <label for="campaignInput">
+                        <i class="bi bi-chat-quote"></i>
+                        Nhập mô tả chiến dịch khuyến mãi:
+                    </label>
+                    <input type="text"
+                           id="campaignInput"
+                           class="form-control"
+                           placeholder="VD: Giảm giá 15% cho tất cả laptop gaming"
+                           value="Giảm giá 10% cho laptop gaming">
+                </div>
+
+                <button type="button" class="btn btn-ai-simulate" onclick="simulateCampaign()">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    Mô phỏng với Gemini AI
+                </button>
+
+                <div class="loading-container" id="loadingContainer">
+                    <div class="loading-spinner"></div>
+                    <p style="color: white; font-weight: 600;">
+                        <i class="bi bi-cpu"></i>
+                        AI đang phân tích dữ liệu sản phẩm và dự đoán kết quả...
+                    </p>
+                </div>
+
+                <div class="results-section" id="resultsSection">
+                    <h5>
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Kết quả phân tích AI
+                    </h5>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+
+            <!-- Voucher Form -->
+            <div class="voucher-form-section card">
+                <div class="card-body">
+                    <form th:action="@{/admin/vouchers/savevoucher}" th:object="${voucher}" th:method="post">
+                        <input type="hidden" th:field="*{id}">
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-12">
+                                <div class="form-group">
+                                    <label>Voucher Code</label>
+                                    <input type="text" th:field="*{name}" class="form-control" placeholder="Enter voucher code">
+                                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;"></div>
+                                    <div th:if="${error}" style="color: red; font-weight: bold; margin-bottom: 5px;">
+                                        <p th:text="${error}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-sm-12">
+                                <div class="form-group">
+                                    <label>Value (%)</label>
+                                    <input type="number" th:field="*{value}" class="form-control" placeholder="Enter discount percentage">
+                                    <div th:if="${#fields.hasErrors('value')}" th:errors="*{value}" style="color: red;"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-sm-12">
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" th:field="*{quantity}" class="form-control" placeholder="Enter quantity">
+                                    <div th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}" style="color: red;"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-sm-12">
+                                <div class="form-group">
+                                    <label>Expiration Date</label>
+                                    <input type="date" name="expiredDate" th:value="${voucher.expiredDate}" class="form-control">
+                                    <div th:if="${#fields.hasErrors('expiredDate')}" th:errors="*{expiredDate}" style="color: red;"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <button type="submit" class="btn btn-submit me-2">Submit</button>
+                                <a th:href="@{/admin/vouchers}" class="btn btn-cancel">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer id="footer" class="footer">
+    <div class="copyright">
+        &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+    </div>
+</footer>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+</a>
+
+<script th:src="@{/admin/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/admin/assets/js/main.js}"></script>
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/jquery-3.6.0.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/sweetalert2@11.js}"></script>
+
+<script>
+    async function simulateCampaign() {
+        const campaignInput = document.getElementById('campaignInput').value.trim();
+        const loadingContainer = document.getElementById('loadingContainer');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContent = document.getElementById('resultsContent');
+
+        if (!campaignInput) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng nhập mô tả chiến dịch!',
+                confirmButtonColor: '#667eea'
+            });
+            return;
+        }
+
+        // Show loading
+        loadingContainer.style.display = 'block';
+        resultsSection.style.display = 'none';
+
+        try {
+            console.log('Sending request:', campaignInput);
+
+            const response = await fetch('/admin/vouchers/simulate-campaign', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    campaignDescription: campaignInput
+                })
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Success data:', data);
+
+            if (data.error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: data.message || 'Có lỗi xảy ra',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            displayResults(data);
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối',
+                html: `Không thể kết nối với AI.<br><small>${error.message}</small>`,
+                footer: '<small>Kiểm tra Console (F12) để xem chi tiết</small>',
+                confirmButtonColor: '#667eea'
+            });
+        } finally {
+            loadingContainer.style.display = 'none';
+        }
+    }
+
+    function displayResults(data) {
+        const resultsContent = document.getElementById('resultsContent');
+        const resultsSection = document.getElementById('resultsSection');
+
+        let html = '';
+
+        // Campaign Overview
+        html += `
+            <div class="result-card">
+                <h6><i class="bi bi-info-circle-fill"></i> Tổng quan chiến dịch</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Mô tả:</span>
+                    <span class="metric-value">${data.campaignDescription || 'N/A'}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Danh mục áp dụng:</span>
+                    <span class="metric-value">${data.targetCategory || 'N/A'}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Mức giảm giá:</span>
+                    <span class="metric-value warning">${data.discountPercentage || 0}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Số sản phẩm áp dụng:</span>
+                    <span class="metric-value">${data.affectedProducts || 0} sản phẩm</span>
+                </div>
+            </div>
+        `;
+
+        // Revenue Prediction
+        html += `
+            <div class="result-card">
+                <h6><i class="bi bi-cash-stack"></i> Dự đoán doanh thu</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Doanh thu hiện tại (TB/tháng):</span>
+                    <span class="metric-value">${formatCurrency(data.currentRevenue)}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Doanh thu dự kiến:</span>
+                    <span class="metric-value success">${formatCurrency(data.predictedRevenue)}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Tăng trưởng:</span>
+                    <span class="metric-value success">+${data.revenueGrowth || 0}%</span>
+                </div>
+            </div>
+        `;
+
+        // Stock Impact
+        html += `
+            <div class="result-card">
+                <h6><i class="bi bi-box-seam-fill"></i> Tác động tồn kho</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Tồn kho hiện tại:</span>
+                    <span class="metric-value">${data.currentStock || 0} SP</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Dự kiến bán ra:</span>
+                    <span class="metric-value success">${data.predictedSales || 0} SP</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Tồn kho sau chiến dịch:</span>
+                    <span class="metric-value ${data.remainingStock < 10 ? 'danger' : ''}">${data.remainingStock || 0} SP</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Tốc độ luân chuyển kho:</span>
+                    <span class="metric-value success">+${data.inventoryTurnover || 0}%</span>
+                </div>
+            </div>
+        `;
+
+        // Effectiveness
+        html += `
+            <div class="result-card">
+                <h6><i class="bi bi-trophy-fill"></i> Độ hiệu quả</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Điểm hiệu quả tổng thể:</span>
+                    <span class="metric-value success">${data.effectivenessScore || 0}/100</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">ROI dự kiến:</span>
+                    <span class="metric-value success">${data.predictedROI || 0}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Khuyến nghị:</span>
+                    <span class="metric-value">${data.recommendation || 'N/A'}</span>
+                </div>
+            </div>
+        `;
+
+        // AI Insights
+        if (data.aiInsights) {
+            html += `
+                <div class="insight-box">
+                    <strong><i class="bi bi-lightbulb-fill"></i> Phân tích AI:</strong>
+                    <p style="margin-top: 10px;">${data.aiInsights}</p>
+                </div>
+            `;
+        }
+
+        resultsContent.innerHTML = html;
+        resultsSection.style.display = 'block';
+
+        // Smooth scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function formatCurrency(value) {
+        if (!value) return '0 VNĐ';
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(value);
+    }
+</script>
+</body>
+</html>

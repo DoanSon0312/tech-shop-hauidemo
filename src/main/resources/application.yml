@@ -1,0 +1,101 @@
+# declare global variable
+SERVER_PORT: 8080
+
+# port of smtp protocol
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+EMAIL_ID: soncoi9atd@gmail.com
+EMAIL_PASSWORD: ulcowwoxoctvgwic
+VERIFY_EMAIL_HOST: http://localhost:${SERVER_PORT}
+
+server:
+  port: ${SERVER_PORT}
+
+ocr:
+  tesseract:
+    datapath: "C:/Program Files/Tesseract-OCR/tessdata"
+    language: "eng+vie"
+
+spring:
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: true
+    always-use-message-format: true
+
+  thymeleaf:
+    mode: HTML
+    suffix: .html
+    prefix: classpath:/templates/
+    cache: false
+
+  main:
+    allow-circular-references: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+      location: ${java.io.tmpdir}
+    session:
+      timeout: 6h
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/tech_shop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: true
+
+  mail:
+    host: ${EMAIL_HOST}
+    port: ${EMAIL_PORT}
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        mime:
+          charset: UTF-8
+        smtp:
+          writetimeout: 10000
+          connectiontimeout: 10000
+          timeout: 10000
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    verify:
+      host: ${VERIFY_EMAIL_HOST}
+
+main:
+  allow-bean-definition-overriding: true
+
+paypal:
+  client:
+    id: AXBTSV0r2LIggE6o5iTeP9lcOXCHLCcLt6Gq4HmZTgZsFnmogPAIjTXF-usf9in5yEHcsPEjrFAWP_V6
+    secret: EJk9cXkWkiZ-5f5J61KQxnj3lb1vrfzGWKjPl7cZ-fuj7vdNiaxqWmzuhK9kQ8noD4CT_iKoBW6G0GpC
+  mode: sandbox
+  return-url: http://localhost:8080/user/checkout/paypal/success
+  cancel-url: http://localhost:8080/user/checkout/paypal/cancel
+
+jwt:
+  signedKey: "zsB+WqpHBR2Lorx/E7adcBsor1NwJQswYtB/bnFZdfThjCXxwyDGlpRtI1dcTPHE"
+
+currency:
+  api:
+    url: "https://v6.exchangerate-api.com/v6/35e55f125051d62ab8e392f6/latest/VND"
+
+gemini:
+  api:
+    key: "AIzaSyAItnzWQIW4MhjHxyIQCWA2k4onpA2UV2Q"
+    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"

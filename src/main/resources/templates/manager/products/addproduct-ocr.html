@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Add Product from Image - OCR</title>
+
+  <!-- Favicons -->
+  <link th:href="@{/admin/assets/img/favicon.png}" rel="icon">
+  <link th:href="@{/admin/assets/img/apple-touch-icon.png}" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <link th:href="@{/admin/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/boxicons/css/boxicons.min.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/quill/quill.snow.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/quill/quill.bubble.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/remixicon/remixicon.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/vendor/simple-datatables/style.css}" rel="stylesheet">
+  <link th:href="@{/admin/assets/css/style.css}" rel="stylesheet">
+
+  <style>
+    .upload-area {
+        border: 3px dashed #007bff;
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .upload-area:hover, .upload-area.dragover {
+        border-color: #0056b3;
+        background: #e3f2fd;
+    }
+    .upload-area i {
+        font-size: 64px;
+        color: #007bff;
+        margin-bottom: 15px;
+    }
+    .preview-container {
+        position: relative;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    .preview-container img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .extracted-text {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 30px;
+    }
+    .file-info {
+        background: #e9ecef;
+        border-radius: 6px;
+        padding: 10px 15px;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .step {
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 20px;
+        background: #e9ecef;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .step.active {
+        background: #007bff;
+        color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{manager/fragments/header::manager-header}"></div>
+<div th:replace="~{manager/fragments/sidebar::manager-sidebar}"></div>
+
+<main id="main" class="main">
+  <div class="page-wrapper">
+    <div class="content">
+      <div class="page-header">
+        <div class="page-title">
+          <h4>Add Product from Image (AI Powered)</h4>
+          <h6>Upload product image to auto-fill information using Gemini AI</h6>
+        </div>
+      </div>
+
+      <div class="step-indicator">
+        <div class="step active">1. Upload Image</div>
+        <div class="step">2. Review Information</div>
+        <div class="step">3. Complete</div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <!-- Bước 1: Upload và OCR -->
+          <div class="row mb-4" id="step1">
+            <div class="col-12">
+              <h5>Upload Product Image</h5>
+              <p class="text-muted">Supported formats: JPG, PNG, WEBP. Drag & drop or click to upload.</p>
+
+              <div class="upload-area" id="uploadArea">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <h5>Drag & Drop your image here</h5>
+                <p class="text-muted">or click to browse files</p>
+                <small class="text-muted">Max file size: 5MB</small>
+              </div>
+
+              <input type="file" id="ocrFileInput" accept="image/jpeg,image/png,image/webp"
+                     style="display: none;">
+
+              <div id="fileInfo" class="file-info" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong id="fileName"></strong>
+                    <span id="fileSize" class="text-muted"></span>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="preview-container mt-3" id="imagePreviewContainer" style="display: none;">
+                <img id="imagePreview" src="" alt="Preview">
+              </div>
+
+              <div class="text-center mt-4">
+                <button type="button" id="extractBtn" class="btn btn-primary btn-lg" disabled>
+                  <i class="bi bi-robot"></i> Extract Information with AI
+                </button>
+              </div>
+
+              <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                  <span class="visually-hidden">Processing...</span>
+                </div>
+                <h5 class="mt-3">AI is analyzing your image...</h5>
+                <p class="text-muted">This may take a few seconds</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kết quả OCR -->
+          <div id="ocrResults" style="display: none;">
+            <div class="row">
+              <div class="col-md-6">
+                <h6>Extracted Text:</h6>
+                <div class="extracted-text" id="extractedText"></div>
+              </div>
+              <div class="col-md-6">
+                <h6>AI Confidence:</h6>
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle"></i>
+                  Using Google Gemini AI for accurate text extraction
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bước 2: Form chỉnh sửa -->
+          <div id="productFormContainer" style="display: none;">
+            <hr>
+            <h5>Review and Edit Product Information</h5>
+            <p class="text-muted">Please review the extracted information and make any necessary corrections.</p>
+
+            <form th:action="@{/manager/products/create-from-ocr}" method="post"
+                  enctype="multipart/form-data" th:object="${productDto}" id="productForm">
+              <div class="row">
+                <div class="col-lg-4 col-sm-6">
+                  <div class="form-group">
+                    <label>Product Name *</label>
+                    <input type="text" th:field="*{name}" class="form-control" required>
+                  </div>
+                </div>
+
+                <div class="col-lg-4 col-sm-6">
+                  <label>Brand *</label>
+                  <select class="form-select" th:field="*{brandId}" required>
+                    <option value="">Select Brand</option>
+                    <option th:each="brand : ${brands}"
+                            th:value="${brand.getId()}"
+                            th:text="${brand.name}"></option>
+                  </select>
+                </div>
+
+                <div class="col-lg-4 col-sm-6">
+                  <label>Category *</label>
+                  <select class="form-select" name="categoryId" id="categoryId" required>
+                    <option value="">Select Category</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.getId()}"
+                            th:text="${cat.name}"></option>
+                  </select>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Price *</label>
+                    <input type="number" th:field="*{price}" class="form-control" step="0.01" required>
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Stock Quantity *</label>
+                    <input type="number" th:field="*{stockQuantity}" class="form-control" required>
+                  </div>
+                </div>
+
+                <!-- THÊM CÁC TRƯỜNG CÒN THIẾU -->
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>CPU</label>
+                    <input type="text" th:field="*{cpu}" class="form-control" placeholder="Enter CPU">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>RAM</label>
+                    <input type="text" th:field="*{ram}" class="form-control" placeholder="Enter RAM">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Operating System</label>
+                    <input type="text" th:field="*{os}" class="form-control" placeholder="Enter OS">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Monitor</label>
+                    <input type="text" th:field="*{monitor}" class="form-control" placeholder="Enter Monitor">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" th:field="*{weight}" class="form-control" step="0.01" placeholder="Enter Weight">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Battery</label>
+                    <input type="text" th:field="*{battery}" class="form-control" placeholder="Enter Battery">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Graphic Card</label>
+                    <input type="text" th:field="*{graphicCard}" class="form-control" placeholder="Enter Graphic Card">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Port</label>
+                    <input type="text" th:field="*{port}" class="form-control" placeholder="Enter Port">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Rear Camera</label>
+                    <input type="text" th:field="*{rearCamera}" class="form-control" placeholder="Enter Rear Camera">
+                  </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-group">
+                    <label>Front Camera</label>
+                    <input type="text" th:field="*{frontCamera}" class="form-control" placeholder="Enter Front Camera">
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-group">
+                    <label>Warranty *</label>
+                    <textarea th:field="*{warranty}" class="form-control" rows="2" required placeholder="Enter Warranty"></textarea>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-group">
+                    <label>Description *</label>
+                    <textarea th:field="*{description}" class="form-control" rows="4" required placeholder="Enter Description"></textarea>
+                  </div>
+                </div>
+
+                <input type="file" name="files" id="hiddenFileInput" style="display: none;">
+
+                <div class="col-12 mt-4">
+                  <div class="d-flex justify-content-between">
+                    <button type="button" id="backToUpload" class="btn btn-secondary">
+                      <i class="bi bi-arrow-left"></i> Back to Upload
+                    </button>
+                    <div>
+                      <button type="submit" class="btn btn-success me-2">
+                        <i class="bi bi-check-circle"></i> Create Product
+                      </button>
+                      <a href="/manager/products" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/jquery-3.6.0.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/admin/assets/vendor/jquery-3.6.0/sweetalert2@11.js}"></script>
+
+<script>
+  let selectedFile = null;
+
+  // Drag and drop functionality
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('ocrFileInput');
+  const fileInfo = document.getElementById('fileInfo');
+  const imagePreview = document.getElementById('imagePreview');
+  const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+  const extractBtn = document.getElementById('extractBtn');
+
+  // Kiểm tra xem các element có tồn tại không
+  if (!uploadArea || !fileInput || !fileInfo || !imagePreview || !imagePreviewContainer || !extractBtn) {
+    console.error('One or more required elements are missing from the DOM');
+  }
+
+  // Prevent default drag behaviors
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    if (uploadArea) {
+      uploadArea.addEventListener(eventName, preventDefaults, false);
+    }
+    document.body.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  // Highlight drop area when item is dragged over it
+  ['dragenter', 'dragover'].forEach(eventName => {
+    if (uploadArea) {
+      uploadArea.addEventListener(eventName, highlight, false);
+    }
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    if (uploadArea) {
+      uploadArea.addEventListener(eventName, unhighlight, false);
+    }
+  });
+
+  function highlight() {
+    if (uploadArea) {
+      uploadArea.classList.add('dragover');
+    }
+  }
+
+  function unhighlight() {
+    if (uploadArea) {
+      uploadArea.classList.remove('dragover');
+    }
+  }
+
+  // Handle dropped files
+  if (uploadArea) {
+    uploadArea.addEventListener('drop', handleDrop, false);
+    uploadArea.addEventListener('click', () => fileInput.click());
+  }
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(files);
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      handleFiles(this.files);
+    });
+  }
+
+  function handleFiles(files) {
+    if (files.length > 0) {
+      const file = files[0];
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        Swal.fire('Error', 'Please upload a valid image file (JPEG, PNG, or WEBP)', 'error');
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire('Error', 'File size must be less than 5MB', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      updateFileInfo(file);
+      previewImage(file);
+      if (extractBtn) extractBtn.disabled = false;
+    }
+  }
+
+  function updateFileInfo(file) {
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+
+    if (fileName && fileSize && fileInfo) {
+      fileName.textContent = file.name;
+      fileSize.textContent = ` (${formatFileSize(file.size)})`;
+      fileInfo.style.display = 'block';
+    }
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function previewImage(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      if (imagePreview && imagePreviewContainer) {
+        imagePreview.src = e.target.result;
+        imagePreviewContainer.style.display = 'block';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Remove file
+  const removeFileBtn = document.getElementById('removeFile');
+  if (removeFileBtn) {
+    removeFileBtn.addEventListener('click', function() {
+      selectedFile = null;
+      if (fileInput) fileInput.value = '';
+      if (fileInfo) fileInfo.style.display = 'none';
+      if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
+      if (extractBtn) extractBtn.disabled = true;
+
+      const ocrResults = document.getElementById('ocrResults');
+      const productFormContainer = document.getElementById('productFormContainer');
+      if (ocrResults) ocrResults.style.display = 'none';
+      if (productFormContainer) productFormContainer.style.display = 'none';
+    });
+  }
+
+  // Extract information
+  if (extractBtn) {
+    extractBtn.addEventListener('click', function() {
+      if (!selectedFile) {
+        Swal.fire('Error', 'Please select an image first', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      // Show loading
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      if (loadingSpinner) loadingSpinner.style.display = 'block';
+      extractBtn.disabled = true;
+
+      fetch('/manager/products/ocr-extract', {
+          method: 'POST',
+          body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (loadingSpinner) loadingSpinner.style.display = 'none';
+          extractBtn.disabled = false;
+
+          if (data.status === 'success') {
+              // Show extracted text
+              const extractedText = document.getElementById('extractedText');
+              const ocrResults = document.getElementById('ocrResults');
+              if (extractedText) extractedText.textContent = data.ocrText;
+              if (ocrResults) ocrResults.style.display = 'block';
+
+              // Fill form with data
+              const productData = data.productData;
+              fillFormData(productData);
+
+              // Show form
+              const productFormContainer = document.getElementById('productFormContainer');
+              if (productFormContainer) {
+                  productFormContainer.style.display = 'block';
+                  // Scroll to form
+                  productFormContainer.scrollIntoView({
+                      behavior: 'smooth'
+                  });
+              }
+
+              Swal.fire('Success', 'AI has successfully extracted the information!', 'success');
+          } else {
+              Swal.fire('Error', data.message, 'error');
+          }
+      })
+      .catch(error => {
+          if (loadingSpinner) loadingSpinner.style.display = 'none';
+          extractBtn.disabled = false;
+          Swal.fire('Error', 'Failed to process image: ' + error, 'error');
+      });
+    });
+  }
+
+  function fillFormData(productData) {
+    // Safe function to set value only if element exists
+    function setValue(selector, value) {
+        const element = document.querySelector(selector);
+        if (element && value !== undefined && value !== null) {
+            element.value = value;
+        }
+    }
+
+    setValue('[name="name"]', productData.name);
+    setValue('[name="price"]', productData.price);
+    setValue('[name="stockQuantity"]', productData.stockQuantity);
+    setValue('[name="cpu"]', productData.cpu);
+    setValue('[name="ram"]', productData.ram);
+    setValue('[name="os"]', productData.os);
+    setValue('[name="monitor"]', productData.monitor);
+    setValue('[name="weight"]', productData.weight);
+    setValue('[name="battery"]', productData.battery);
+    setValue('[name="graphicCard"]', productData.graphicCard);
+    setValue('[name="port"]', productData.port);
+    setValue('[name="rearCamera"]', productData.rearCamera);
+    setValue('[name="frontCamera"]', productData.frontCamera);
+    setValue('[name="warranty"]', productData.warranty);
+    setValue('[name="description"]', productData.description);
+
+    // Transfer file to hidden input
+    const hiddenFileInput = document.getElementById('hiddenFileInput');
+    if (hiddenFileInput && selectedFile) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(selectedFile);
+        hiddenFileInput.files = dataTransfer.files;
+    }
+  }
+
+  // Back to upload
+  const backToUploadBtn = document.getElementById('backToUpload');
+  if (backToUploadBtn) {
+    backToUploadBtn.addEventListener('click', function() {
+      const productFormContainer = document.getElementById('productFormContainer');
+      const ocrResults = document.getElementById('ocrResults');
+      const step1 = document.getElementById('step1');
+
+      if (productFormContainer) productFormContainer.style.display = 'none';
+      if (ocrResults) ocrResults.style.display = 'none';
+      if (step1) step1.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+</script>
+
+</body>
+</html>

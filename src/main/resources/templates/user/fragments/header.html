@@ -1,0 +1,131 @@
+<header class="header axil-header header-style-5" th:fragment="header">
+
+
+    <div id="axil-sticky-placeholder"></div>
+
+    <div class="axil-mainmenu">
+        <div class="container">
+            <div class="header-navbar">
+
+                <div class="header-brand">
+                    <a th:href="@{/user/home}" class="logo logo-dark">
+                        <img th:src="@{/user/assets/images/logo/logo.png}" alt="Site Logo">
+                    </a>
+                    <a th:href="@{/user/home}" class="logo logo-light">
+                        <img th:src="@{/user/assets/images/logo/logo-light.png}" alt="Site Logo">
+                    </a>
+                </div>
+
+                <div class="header-main-nav">
+                    <nav class="mainmenu-nav">
+                        <ul class="mainmenu">
+                            <li><a th:href="@{/user/home}" th:text="#{nav.home}">Home</a></li>
+                            <li><a th:href="@{/user/products}" th:text="#{nav.shop}">Shop</a></li>
+                            <li class="menu-item-has-children">
+                                <a href="#" th:text="#{nav.pages}">Pages</a>
+                                <ul class="axil-submenu">
+                                    <li th:if="${session.wishlistId != null}">
+                                        <a th:href="@{/user/wishlist(wishlistId=${session.wishlistId})}" th:text="#{nav.wishlist}">Wishlist</a>
+                                    </li>
+                                    <li><a th:href="@{/user/cart}" th:text="#{nav.cart}">Cart</a></li>
+                                </ul>
+                            </li>
+                            <li><a th:href="@{/user/about-us}" th:text="#{nav.about}">About</a></li>
+                            <li class="menu-item-has-children"><a href="#" th:text="#{nav.blog}">Blog</a></li>
+                            <li><a th:href="@{/user/contact}" th:text="#{nav.contact}">Contact</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="header-action">
+                    <ul class="action-list">
+
+                        <li class="axil-search d-sm-none d-block">
+                            <a href="javascript:void(0)" class="header-search-icon" th:title="#{search.title}">
+                                <i class="flaticon-magnifying-glass"></i>
+                            </a>
+                        </li>
+
+                        <li class="wishlist">
+                            <a th:href="${session.wishlistId != null} ? @{/user/wishlist(wishlistId=${session.wishlistId})} : '#'">
+                                <p class="cart-count"
+                                   th:if="${session.wishlistCount != null && session.wishlistCount > 0}"
+                                   th:text="${session.wishlistCount}">
+                                </p>
+                                <i class="flaticon-heart"></i>
+                            </a>
+                        </li>
+
+                        <li class="shopping-cart">
+                            <a href="#" class="cart-dropdown-btn">
+                                <span class="cart-count"
+                                      th:if="${session.numberProductInCart != null && session.numberProductInCart > 0}"
+                                      th:text="${session.numberProductInCart}">
+                                </span>
+                                <i class="flaticon-shopping-cart"></i>
+                            </a>
+                        </li>
+
+                        <li class="my-account">
+                            <a href="javascript:void(0)">
+                                <i class="flaticon-person"></i>
+                                <p class="sub-title" th:if="${session.user != null and #authentication?.principal != 'anonymousUser'}" th:text="${session.user.lastName}"></p>
+                            </a>
+                            <div class="my-account-dropdown">
+                                <span class="title" th:text="#{account.quicklinks}">QUICKLINKS</span>
+                                <ul th:if="${session.user != null}">
+                                    <li><a th:href="@{/user/my-account}" th:text="#{footer.my_account}">My Account</a></li>
+                                    <li th:if="${session.user.role != null and #strings.equalsIgnoreCase(session.user.role.name,'admin')}">
+                                        <a th:href="@{/admin/dashboard}" th:text="#{account.admin_dashboard}">Dashboard Admin</a>
+                                    </li>
+                                    <li th:if="${session.user.role != null and #strings.equalsIgnoreCase(session.user.role.name, 'manager')}">
+                                        <a th:href="@{/manager/dashboard}" th:text="#{account.manager_home}">Home Manager</a>
+                                    </li>
+                                    <li><a href="#" th:text="#{header.support}">Support</a></li>
+                                </ul>
+                                <div class="login-btn">
+                                    <a th:if="${#authentication?.principal != 'anonymousUser'}" th:href="@{/logout}" class="axil-btn btn-bg-primary" th:text="#{account.logout}">Logout</a>
+                                    <a th:if="${#authentication?.principal == 'anonymousUser'}" th:href="@{/login}" class="axil-btn btn-bg-primary" th:text="#{account.login}">Login</a>
+                                </div>
+                                <div class="reg-footer text-center">
+                                    <span th:text="#{account.no_account}">No account yet?</span>
+                                    <a th:href="@{/register}" class="btn-link" th:text="#{account.register_here}">REGISTER HERE.</a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="axil-mobile-toggle">
+                            <button class="menu-btn mobile-nav-toggler">
+                                <i class="flaticon-menu-2"></i>
+                            </button>
+                        </li>
+
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="header-top-campaign">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-5 col-lg-6 col-md-10">
+                    <div class="header-campaign-activation axil-slick-arrow arrow-both-side header-campaign-arrow">
+                        <div class="slick-slide">
+                            <div class="campaign-content">
+                                <p>STUDENT NOW GET 10% OFF : <a href="#">GET OFFER</a></p>
+                            </div>
+                        </div>
+                        <div class="slick-slide">
+                            <div class="campaign-content">
+                                <p>STUDENT NOW GET 10% OFF : <a href="#">GET OFFER</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</header>

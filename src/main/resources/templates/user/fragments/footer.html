@@ -1,0 +1,144 @@
+<footer class="axil-footer-area footer-style-2" th:fragment="footer">
+    <!-- Start Footer Top Area  -->
+    <div class="footer-top separator-top">
+        <div class="container">
+            <div class="row">
+                <!-- Start Single Widget  -->
+                <div class="col-lg-3 col-sm-6">
+                    <div class="axil-footer-widget">
+                        <h5 class="widget-title" th:text="#{footer.support}">Support</h5>
+                        <div class="logo mb--30">
+                            <a th:href="@{/user/home}">
+                                <img class="light-logo" th:src="@{/user/assets/images/logo/logo.png}" alt="Logo Images">
+                            </a>
+                        </div>
+                        <div class="inner">
+                            <p th:text="#{footer.address}">
+                                Trường Đại học Công Nghiệp Hà Nội, <br />
+                                Số 298 Đ. Cầu Diễn, <br />
+                                Minh Khai, Bắc Từ Liêm, Hà Nội.
+                            </p>
+                            <ul class="support-list-item">
+                                <li>
+                                    <a href="mailto:soncoi9atd@gmail.com">
+                                        <i class="fal fa-envelope-open"></i>
+                                        soncoi9atd@gmail.com
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="tel:(+84)962-004-435">
+                                        <i class="fal fa-phone-alt"></i> (+84) 962-004-435
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Single Widget  -->
+
+                <!-- Start Single Widget  -->
+                <div class="col-lg-3 col-sm-6">
+                    <div class="axil-footer-widget">
+                        <h5 class="widget-title" th:text="#{footer.account}">Account</h5>
+                        <div class="inner">
+                            <ul>
+                                <li><a th:href="@{/user/my-account}" th:text="#{footer.my_account}">My Account</a></li>
+                                <li><a th:href="@{/login}" th:text="#{footer.login_register}">Login / Register</a></li>
+                                <li><a th:href="@{/user/cart}" th:text="#{nav.cart}">Cart</a></li>
+                                <li><a th:href="@{/user/wishlist(wishlistId=${session.wishlistId})}" th:text="#{nav.wishlist}">Wishlist</a></li>
+                                <li><a th:href="@{/user/home}" th:text="#{nav.shop}">Shop</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Single Widget  -->
+
+                <!-- Start Single Widget  -->
+                <div class="col-lg-3 col-sm-6">
+                    <div class="axil-footer-widget">
+                        <h5 class="widget-title" th:text="#{footer.quick_link}">Quick Link</h5>
+                        <div class="inner">
+                            <ul>
+                                <li><a href="#" th:text="#{footer.privacy_policy}">Privacy Policy</a></li>
+                                <li><a href="#" th:text="#{footer.terms_of_use}">Terms Of Use</a></li>
+                                <li><a href="#" th:text="#{footer.faq}">FAQ</a></li>
+                                <li><a href="#" th:text="#{nav.blog}">Blog</a></li>
+                                <li><a th:href="@{/user/contact}" th:text="#{nav.contact}">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Single Widget  -->
+
+                <!-- Start Single Widget  -->
+                <div class="col-lg-3 col-sm-6">
+                    <div class="axil-footer-widget">
+                        <h5 class="widget-title" th:text="#{footer.download_app}">Download App</h5>
+                        <div class="inner">
+                            <span th:text="#{footer.app_offer}">Save $3 With App & New User only</span>
+                            <div class="download-btn-group">
+                                <div class="qr-code">
+                                    <img th:src="@{/user/assets/images/others/qr.png}" alt="Axilthemes" />
+                                </div>
+                                <div class="app-link">
+                                    <a href="#">
+                                        <img th:src="@{/user/assets/images/others/app-store.png}" alt="App Store" />
+                                    </a>
+                                    <a href="#">
+                                        <img th:src="@{/user/assets/images/others/play-store.png}" alt="Play Store" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Single Widget  -->
+            </div>
+        </div>
+    </div>
+    <!-- End Footer Top Area  -->
+
+    <!-- Start Copyright Area  -->
+    <div class="copyright-area copyright-default separator-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-xl-4">
+                    <div class="social-share">
+                        <a href="https://www.facebook.com/oannangtruongson"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-12">
+                    <div class="copyright-left d-flex flex-wrap justify-content-center">
+                        <ul class="quick-link">
+                            <li>
+                                <span th:text="#{footer.copyright}">© 2025. All rights reserved by</span>
+                                <a target="_blank" href="https://github.com/DoanSon0312/tech-shop.git">Đ.N.T.Sơn.</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-12">
+                    <div class="copyright-right d-flex flex-wrap justify-content-xl-end justify-content-center align-items-center">
+                        <span class="card-text" th:text="#{footer.payment_methods}">Accept For</span>
+                        <ul class="payment-icons-bottom quick-link">
+                            <li>
+                                <img th:src="@{/user/assets/images/icons/cart/cart-1.png}" alt="paypal cart" />
+                            </li>
+                            <li>
+                                <img th:src="@{/user/assets/images/icons/cart/vnpay.png}" alt="paypal cart" />
+                            </li>
+                            <li>
+                                <img th:src="@{/user/assets/images/icons/cart/cart-5.png}" alt="paypal cart" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Copyright Area  -->
+</footer>

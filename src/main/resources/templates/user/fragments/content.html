@@ -1,0 +1,30 @@
+<!-- Start Categorie Area  -->
+<div th:fragment="category-area" class="axil-categorie-area bg-color-white axil-section-gapcommon">
+    <div class="container">
+        <div class="section-title-wrapper">
+            <span class="title-highlighter highlighter-secondary">
+                <i class="far fa-tags"></i>
+                <span th:text="#{brands.title}">Brands</span>
+            </span>
+            <h2 class="title" th:text="#{brands.browse_brands}">Browse by Brands</h2>
+        </div>
+        <div class="categrie-product-activation slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+            <div th:each="brand : ${brands}" class="slick-single-layout">
+                <div class="categrie-product" data-sal="zoom-out" data-sal-delay="200" data-sal-duration="500">
+                    <a th:href="@{/user/products(brandNames=${brand.name})}">
+                        <img th:if="${brand.brandImg.startsWith('https')}"
+                             class="img-fluid"
+                             th:src="@{${brand.brandImg}}"
+                             th:alt="${brand.name} + ' ' + #{brands.logo_alt}">
+                        <img th:unless="${brand.brandImg.startsWith('https')}"
+                             class="img-fluid"
+                             th:src="@{'/uploads/'+${brand.brandImg}}"
+                             th:alt="${brand.name} + ' ' + #{brands.logo_alt}">
+                        <h6 class="cat-title" th:text="${brand.name}"></h6>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Categorie Area  -->

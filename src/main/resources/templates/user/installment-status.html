@@ -1,0 +1,244 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+  <title>TechShop || Trạng thái trả góp</title>
+  <div th:insert="~{user/fragments/head::head}"></div>
+  <link rel="stylesheet" th:href="@{/user/customize/css/main.css}"/>
+  <style>
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .status-completed {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    .payment-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    .payment-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #007bff;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2rem;
+        top: 0.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #007bff;
+        border: 2px solid white;
+    }
+    .payment-status-paid {
+        color: #28a745;
+    }
+    .payment-status-pending {
+        color: #ffc107;
+    }
+    .payment-status-overdue {
+        color: #dc3545;
+    }
+  </style>
+</head>
+
+<body class="sticky-header overflow-md-visible">
+<a href="#top" class="back-to-top" id="backto-top"><i class="fal fa-arrow-up"></i></a>
+<!-- Start Header -->
+<div th:insert="~{user/fragments/header::header}"></div>
+<!-- End Header -->
+
+<main class="main-wrapper">
+  <!-- Start Breadcrumb Area -->
+  <div class="axil-breadcrumb-area breadcrumb-style-2 bg-color-white">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="inner">
+            <h1 class="page-title">Trạng thái trả góp</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Breadcrumb Area -->
+
+  <!-- Start Installment Status Area -->
+  <div class="axil-installment-status-area axil-section-gapcommon bg-color-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div th:if="${installmentRequest}" class="installment-status-content">
+            <!-- Header Section -->
+            <div class="status-header text-center mb-5">
+              <h2 class="mb-3">Thông tin trả góp</h2>
+              <div class="status-badge" th:classappend="'status-' + ${installmentRequest.status.toLowerCase()}">
+                <span th:text="${installmentRequest.status}">PENDING</span>
+              </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Thông tin đơn hàng</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Mã yêu cầu:</strong> #<span th:text="${installmentRequest.id}"></span></p>
+                    <p><strong>Mã đơn hàng:</strong> #<span th:text="${installmentRequest.order.id}"></span></p>
+                    <p><strong>Ngày tạo:</strong> <span th:text="${#temporals.format(installmentRequest.createdAt, 'dd/MM/yyyy HH:mm')}"></span></p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Sản phẩm:</strong> <span th:text="${installmentRequest.order.orderDetails[0].product.name}"></span></p>
+                    <p><strong>Tổng giá trị:</strong> <span th:text="${#numbers.formatCurrency(installmentRequest.order.totalPrice, 0, 'COMMA', 0, 'POINT')}"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Installment Details -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Thông tin trả góp</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Đối tác tài chính:</strong> <span th:text="${installmentRequest.installmentPlan.financePartner.name}"></span></p>
+                    <p><strong>Kỳ hạn:</strong> <span th:text="${installmentRequest.installmentPlan.months + ' tháng'}"></span></p>
+                    <p><strong>Lãi suất:</strong> <span th:text="${installmentRequest.installmentPlan.interestRate + '%'}"></span></p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Số tiền vay:</strong> <span th:text="${#numbers.formatCurrency(installmentRequest.loanAmount, 0, 'COMMA', 0, 'POINT')}"></span></p>
+                    <p><strong>Trả hàng tháng:</strong> <span class="text-success" th:text="${#numbers.formatCurrency(installmentRequest.monthlyPayment, 0, 'COMMA', 0, 'POINT')}"></span></p>
+                    <p><strong>Tổng lãi:</strong> <span th:text="${#numbers.formatCurrency(installmentRequest.totalInterest, 0, 'COMMA', 0, 'POINT')}"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Schedule -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Lịch trình thanh toán</h5>
+              </div>
+              <div class="card-body">
+                <div class="payment-timeline">
+                  <div th:each="payment, iter : ${payments}" class="timeline-item">
+                    <h6>Kỳ <span th:text="${iter.index + 1}"></span> -
+                      <span th:text="${#temporals.format(payment.dueDate, 'dd/MM/yyyy')}"></span></h6>
+                    <p>
+                      Số tiền: <strong th:text="${#numbers.formatCurrency(payment.amount, 0, 'COMMA', 0, 'POINT')}"></strong>
+                      <span th:classappend="'payment-status-' + ${payment.status.toLowerCase()}"
+                            class="ms-2" th:text="${payment.status}"></span>
+                    </p>
+                    <p th:if="${payment.paidDate}">
+                      Đã thanh toán: <span th:text="${#temporals.format(payment.paidDate, 'dd/MM/yyyy')}"></span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card mb-4" th:if="${installmentRequest.documents}">
+              <div class="card-header">
+                <h5 class="mb-0">Tài liệu đã tải lên</h5>
+              </div>
+              <div class="card-body">
+                <div class="document-list">
+                                    <span th:each="doc : ${#strings.arraySplit(installmentRequest.documents, ',')}"
+                                          class="badge bg-secondary me-2 mb-2">
+                                        <i class="fas fa-file-pdf me-1"></i>
+                                        <span th:text="${doc}"></span>
+                                    </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-5">
+              <a th:href="@{/user/products}" class="btn btn-primary me-3">
+                <i class="fas fa-shopping-bag me-2"></i>Tiếp tục mua sắm
+              </a>
+              <a th:href="@{/user/orders}" class="btn btn-outline-primary me-3">
+                <i class="fas fa-list me-2"></i>Xem đơn hàng
+              </a>
+              <button th:if="${installmentRequest.status == 'PENDING'}" class="btn btn-warning">
+                <i class="fas fa-clock me-2"></i>Đang chờ duyệt
+              </button>
+              <button th:if="${installmentRequest.status == 'APPROVED'}" class="btn btn-success">
+                <i class="fas fa-check me-2"></i>Đã duyệt
+              </button>
+              <button th:if="${installmentRequest.status == 'REJECTED'}" class="btn btn-danger">
+                <i class="fas fa-times me-2"></i>Đã từ chối
+              </button>
+            </div>
+
+          </div>
+
+          <div th:unless="${installmentRequest}" class="text-center">
+            <div class="alert alert-warning">
+              <h4>Không tìm thấy yêu cầu trả góp</h4>
+              <p>Không tìm thấy thông tin yêu cầu trả góp với mã: <strong th:text="${requestId}"></strong></p>
+            </div>
+            <a th:href="@{/user/products}" class="btn btn-primary">
+              <i class="fas fa-shopping-bag me-2"></i>Quay lại mua sắm
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Installment Status Area -->
+</main>
+
+<!-- Start Footer Area  -->
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- JS -->
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Có thể thêm các tính năng JavaScript cho trang status ở đây
+      console.log('Installment status page loaded');
+
+      // Ví dụ: Auto-refresh trang mỗi 30 giây nếu trạng thái là PENDING
+      const status = '[[${installmentRequest?.status}]]';
+      if (status === 'PENDING') {
+          setTimeout(function() {
+              window.location.reload();
+          }, 30000);
+      }
+  });
+</script>
+
+</body>
+</html>

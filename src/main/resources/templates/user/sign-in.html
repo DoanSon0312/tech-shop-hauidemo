@@ -1,0 +1,96 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Tech Shop || Sign in</title>
+    <div th:insert="~{user/fragments/head :: head}"></div>
+</head>
+<body>
+<div class="axil-signin-area">
+    <!-- Start Header -->
+    <div class="signin-header">
+        <div class="row align-items-center">
+            <div class="col-sm-4">
+                <a th:href="@{/user/home}" class="site-logo"><img th:src="@{/user/assets/images/logo/logo.png}" alt="logo"></a>
+            </div>
+            <div class="col-sm-8">
+                <div class="singin-header-btn">
+                    <p>Not a member?</p>
+                    <a th:href="@{/register}" class="axil-btn btn-bg-secondary sign-up-btn">Sign Up Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Header -->
+
+    <div class="row">
+        <div class="col-xl-4 col-lg-6">
+            <div class="axil-signin-banner bg_image bg_image--9">
+                <h3 class="title">We Offer the Best Products</h3>
+            </div>
+        </div>
+        <div class="col-lg-6 offset-xl-2">
+            <div class="axil-signin-form-wrap">
+                <div class="axil-signin-form">
+                    <h3 class="title">Sign in to Tech Shop.</h3>
+                    <p class="b2 mb--55">Enter your detail below</p>
+                    <form th:action="@{/login}" method="post" class="singin-form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Enter password">
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between">
+                            <button type="submit" onclick="return login()" class="axil-btn btn-bg-primary submit-btn">Sign In</button>
+                            <a th:href="@{/forgot-password}" class="forgot-btn">Forget password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="content"></div>
+
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script>
+    // Hàm login validation
+    function login() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        if (username === "" || password === "") {
+            toast.warning("Please enter complete information!");
+            return false; // Ngăn form submit
+        }
+        return true; // Cho phép form submit
+    }
+
+    // Toast notifications - Chạy sau khi page load
+    window.addEventListener('DOMContentLoaded', function() {
+        // Kiểm tra các tham số URL và hiển thị toast
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.has('usernameNotFound')) {
+            toast.warning('Username does not exist!');
+        }
+
+        if (urlParams.has('disabled')) {
+            toast.warning('Account not activated. Send email to activate, then log in!');
+        }
+
+        if (urlParams.has('verified')) {
+            toast.success('Account verification successful! Please log in.');
+        }
+
+        if (urlParams.has('incorrect')) {
+            toast.error('Incorrect username or password. Please try again!');
+        }
+    });
+</script>
+</body>
+</html>

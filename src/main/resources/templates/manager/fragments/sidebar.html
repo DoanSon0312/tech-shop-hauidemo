@@ -1,0 +1,136 @@
+<aside id="sidebar" th:fragment="manager-sidebar" class="sidebar">
+
+  <ul class="sidebar-nav" id="sidebar-nav">
+
+    <li class="nav-item">
+      <a class="nav-link " th:href="@{/manager/dashboard}">
+        <i class="bi bi-grid"></i>
+        <span>Dashboard</span>
+      </a>
+    </li><!-- End Dashboard Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#product-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-box-seam"></i><span>Product</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="product-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+        <li>
+          <a th:href="@{/manager/products}">
+            <i class="bi bi-circle"></i><span>Product List</span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/manager/products/deleted}">
+            <i class="bi bi-circle"></i><span>Deleted Products</span>
+          </a>
+        </li>
+      </ul>
+    </li><!-- End Product Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/orders}">
+        <i class="bi bi-cart-check"></i><span>Order</span>
+      </a>
+    </li><!-- End Order Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/customers}">
+        <i class="bi bi-people"></i><span>Contact</span>
+      </a>
+    </li><!-- End Customer Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/installments}">
+        <i class="bi bi-credit-card"></i><span>Installment</span>
+      </a>
+    </li><!-- End Installment Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#voucher-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-gift"></i><span>Voucher</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="voucher-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+        <li>
+          <a th:href="@{/manager/vouchers}">
+            <i class="bi bi-circle"></i><span>Voucher List</span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/manager/vouchers/save}">
+            <i class="bi bi-circle"></i><span>Add Voucher</span>
+          </a>
+        </li>
+      </ul>
+    </li><!-- End Voucher Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#brand-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-award"></i><span>Brand</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="brand-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+        <li>
+          <a th:href="@{/manager/brands}">
+            <i class="bi bi-circle"></i><span>Brand List</span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/manager/brands/add-brand}">
+            <i class="bi bi-circle"></i><span>Add Brand</span>
+          </a>
+        </li>
+      </ul>
+    </li><!-- End Brand Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/user/home}">
+        <i class="bi bi-house-door"></i><span>User Home</span>
+      </a>
+    </li><!-- End User Home Nav -->
+
+    <!-- Admin Home - Chỉ hiển thị cho ADMIN -->
+    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+      <a class="nav-link collapsed" th:href="@{/admin/dashboard}">
+        <i class="bi bi-speedometer2"></i><span>Admin Home</span>
+      </a>
+    </li><!-- End Admin Home Nav -->
+
+    <li class="nav-heading">Pages</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/profile}">
+        <i class="bi bi-person"></i>
+        <span>Profile</span>
+      </a>
+    </li><!-- End Profile Page Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/faq}">
+        <i class="bi bi-question-circle"></i>
+        <span>F.A.Q</span>
+      </a>
+    </li><!-- End F.A.Q Page Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/contact}">
+        <i class="bi bi-envelope"></i>
+        <span>Contact</span>
+      </a>
+    </li><!-- End Contact Page Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/error}">
+        <i class="bi bi-dash-circle"></i>
+        <span>Error 404</span>
+      </a>
+    </li><!-- End Error 404 Page Nav -->
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" th:href="@{/manager/blank}">
+        <i class="bi bi-file-earmark"></i>
+        <span>Blank</span>
+      </a>
+    </li><!-- End Blank Page Nav -->
+
+  </ul>
+
+</aside><!-- End Sidebar-->

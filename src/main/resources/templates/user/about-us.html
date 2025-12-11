@@ -1,0 +1,277 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{about.page_title}">Tech Shop || About Us</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+</head>
+
+<body class="sticky-header">
+<a href="#top" class="back-to-top" id="backto-top"><i class="fal fa-arrow-up"></i></a>
+<!-- Start Header -->
+<div th:insert="~{user/fragments/header::header}"></div>
+<!-- End Header -->
+
+<main class="main-wrapper">
+    <!-- Start Breadcrumb Area  -->
+    <div class="axil-breadcrumb-area">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="inner">
+                        <ul class="axil-breadcrumb">
+                            <li class="axil-breadcrumb-item"><a th:href="@{/user/home}" th:text="#{nav.home}">Home</a></li>
+                            <li class="separator"></li>
+                            <li class="axil-breadcrumb-item active" aria-current="page" th:text="#{about.breadcrumb}">About Us</li>
+                        </ul>
+                        <h1 class="title" th:text="#{about.title}">About Our Store</h1>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-4">
+                    <div class="inner">
+                        <div class="bradcrumb-thumb">
+                            <img th:src="@{/user/assets/images/product/product-45.png}" th:alt="#{about.image_alt}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Breadcrumb Area  -->
+
+    <!-- Start About Area  -->
+    <div class="axil-about-area about-style-1 axil-section-gap ">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-xl-4 col-lg-6">
+                    <div class="about-thumbnail">
+                        <div class="thumbnail">
+                            <img th:src="@{/user/assets/images/team/temawork.jpg}" th:alt="#{about.team_image_alt}">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-8 col-lg-6">
+                    <div class="about-content content-right">
+                            <span class="title-highlighter highlighter-primary2">
+                                <i class="far fa-shopping-basket"></i>
+                                <span th:text="#{about.store_title}">About Store</span>
+                            </span>
+                        <h3 class="title" th:text="#{about.main_heading}">Mua sắm thả ga tại nhà trên ứng dụng của chúng tôi.</h3>
+                        <span class="text-heading" th:text="#{about.sub_heading}">TechShop là niềm tự hào khi có thể cho phép khách hàng thanh toán bằng nhiều cách.</span>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <p th:text="#{about.description_1}">Đồ án kết thúc học phần môn Đồ án chuyên ngành.</p>
+                            </div>
+                            <div class="col-xl-6">
+                                <p class="mb--0" th:text="#{about.description_2}">Thầy Hướng dẫn thực hiện - Phạm Thế Anh</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End About Area  -->
+
+    <!-- Start About Area  -->
+    <div class="about-info-area">
+        <div class="container">
+            <div class="row row--20">
+                <div class="col-lg-4">
+                    <div class="about-info-box">
+                        <div class="thumb">
+                            <img th:src="@{/user/assets/images/about/shape-01.png}" th:alt="#{about.stats_shape_alt}">
+                        </div>
+                        <div class="content">
+                            <h6 class="title" th:text="#{about.stats_1_title}">40,000+ Happy Customer</h6>
+                            <p th:text="#{about.stats_1_description}">Empower your sales teams with industry tailored solutions that support.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="about-info-box">
+                        <div class="thumb">
+                            <img th:src="@{/user/assets/images/about/shape-02.png}" th:alt="#{about.stats_shape_alt}">
+                        </div>
+                        <div class="content">
+                            <h6 class="title" th:text="#{about.stats_2_title}">16 Years of Experiences</h6>
+                            <p th:text="#{about.stats_2_description}">Empower your sales teams with industry tailored solutions that support.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="about-info-box">
+                        <div class="thumb">
+                            <img th:src="@{/user/assets/images/about/shape-03.png}" th:alt="#{about.stats_shape_alt}">
+                        </div>
+                        <div class="content">
+                            <h6 class="title" th:text="#{about.stats_3_title}">12 Awards Won</h6>
+                            <p th:text="#{about.stats_3_description}">Empower your sales teams with industry tailored solutions that support.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End About Area  -->
+
+    <!-- Start Team Area  -->
+    <div class="axil-team-area bg-wild-sand">
+        <div class="team-left-fullwidth">
+            <div class="container ml--xxl-0">
+                <div class="section-title-wrapper">
+                        <span class="title-highlighter highlighter-primary">
+                            <i class="fas fa-users"></i>
+                            <span th:text="#{about.team_title}">Our Team</span>
+                        </span>
+                    <h3 class="title" th:text="#{about.team_subtitle}">Expart Management Team</h3>
+                </div>
+                <div class="team-slide-activation slick-layout-wrapper--20 axil-slick-arrow  arrow-top-slide">
+                    <div class="slick-single-layout">
+                        <div class="axil-team-member">
+                            <div class="thumbnail"><img th:src="@{/user/assets/images/team/team-01.png}" th:alt="#{about.team_member_1}"></div>
+                            <div class="team-content">
+                                <span class="subtitle" th:text="#{about.role_project_manager}">Project Manager</span>
+                                <h5 class="title">Đoàn Năng Trường Sơn</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slick-single-layout">
+                        <div class="axil-team-member">
+                            <div class="thumbnail"><img th:src="@{/user/assets/images/team/team-03.png}" th:alt="#{about.team_member_2}"></div>
+                            <div class="team-content">
+                                <span class="subtitle" th:text="#{about.role_team_member}">Thành viên nhóm</span>
+                                <h5 class="title">Đỗ Xuân Vương</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slick-single-layout">
+                        <div class="axil-team-member">
+                            <div class="thumbnail"><img th:src="@{/user/assets/images/team/team-02.png}" th:alt="#{about.team_member_3}"></div>
+                            <div class="team-content">
+                                <span class="subtitle" th:text="#{about.role_team_member}">Thành viên nhóm</span>
+                                <h5 class="title">Đỗ Tuấn Đạt</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slick-single-layout">
+                        <div class="axil-team-member">
+                            <div class="thumbnail"><img th:src="@{/user/assets/images/team/team-04.png}" th:alt="#{about.team_member_4}"></div>
+                            <div class="team-content">
+                                <span class="subtitle" th:text="#{about.role_team_member}">Thành viên nhóm</span>
+                                <h5 class="title">Phạm Văn Vũ</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Team Area  -->
+
+    <!-- Start About Area  -->
+    <div class="axil-about-area about-style-2">
+        <div class="container">
+            <div class="row align-items-center mb--80 mb_sm--60">
+                <div class="col-lg-5">
+                    <div class="about-thumbnail">
+                        <img th:src="@{/user/assets/images/about/about-02.png}" th:alt="#{about.feature_image_alt}">
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="about-content content-right">
+                        <span class="subtitle" th:text="#{about.feature_1_subtitle}">Features #01</span>
+                        <h4 class="title" th:text="#{about.feature_1_title}">Solutions that work together</h4>
+                        <p th:text="#{about.feature_1_description}">Publish your eCommerce site quickly with our easy-to-use store builder— no coding required. Migrate your items from your point of sale system or turn your Instagram feed into a shopping site and start selling fast. Square Online works for all kinds of businesses—retail, restaurants, services.</p>
+                        <a th:href="@{/user/contact}" class="axil-btn btn-outline" th:text="#{about.get_in_touch}">Get In Touch</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-lg-5 order-lg-2">
+                    <div class="about-thumbnail">
+                        <img th:src="@{/user/assets/images/about/about-03.png}" th:alt="#{about.feature_image_alt}">
+                    </div>
+                </div>
+                <div class="col-lg-7 order-lg-1">
+                    <div class="about-content content-left">
+                        <span class="subtitle" th:text="#{about.feature_2_subtitle}">Features #01</span>
+                        <h4 class="title" th:text="#{about.feature_2_title}">Solutions that work together</h4>
+                        <p th:text="#{about.feature_2_description}">Publish your eCommerce site quickly with our easy-to-use store builder— no coding required. Migrate your items from your point of sale system or turn your Instagram feed into a shopping site and start selling fast. Square Online works for all kinds of businesses—retail, restaurants, services.</p>
+                        <a th:href="@{/user/contact}" class="axil-btn btn-outline" th:text="#{about.get_in_touch}">Get In Touch</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End About Area  -->
+
+    <!-- Start Axil Newsletter Area  -->
+    <div th:insert="~{user/fragments/newsletter::newsletter}"></div>
+    <!-- End Axil Newsletter Area  -->
+</main>
+
+<div th:insert="~{user/fragments/service-area-footer::service-area-footer}"></div>
+<!-- Start Footer Area  -->
+<div th:insert="~{user/fragments/footer::footer}"></div>
+<!-- End Footer Area  -->
+
+<!-- Product Quick View Modal Start -->
+<div th:insert="~{user/fragments/quickview::quick-view}"></div>
+<!-- Product Quick View Modal End -->
+
+<!-- Header Search Modal End -->
+<div th:insert="~{user/fragments/header-search::header-search}"></div>
+<!-- Header Search Modal End -->
+
+<div class="cart-dropdown" id="cart-dropdown">
+    <div class="cart-content-wrap">
+        <div class="cart-header">
+            <h2 class="header-title" th:text="#{cart.review}">Cart review</h2>
+            <button class="cart-close sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <ul class="cart-item-list" th:each="cartDetail : ${cartDetailList}">
+                <li class="cart-item">
+                    <div class="item-img">
+                        <a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}">
+                            <img th:if="${cartDetail.isUrlImage()}"
+                                 th:src="${cartDetail.thumbnail}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                            <img th:unless="${cartDetail.isUrlImage()}"
+                                 th:src="@{'/uploads/' + ${cartDetail.thumbnail}}"
+                                 class="product-image"
+                                 th:alt="#{product.image_alt}">
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><a th:href="@{/user/products/product-detail/{id}(id=${cartDetail.productId})}"
+                                                  th:text="${cartDetail.productName}"></a></h3>
+                        <div class="item-price"><span class="currency-symbol"></span><span th:text="${cartDetail.price}"></span></div>
+                        <div class="pro-qty item-quantity">
+                            <input type="number" class="quantity-input" th:value="${cartDetail.quantity}">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="cart-footer">
+            <h3 class="cart-subtotal">
+                <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
+                <span class="subtotal-amount" th:if="${cart.id != null}"
+                      th:text="${totalPriceOfCart.totalPrice}"></span>
+            </h3>
+            <div class="group-btn">
+                <a th:href="@{/user/cart}" class="axil-btn btn-bg-primary viewcart-btn" th:text="#{cart.view_cart}">View Cart</a>
+                <a th:href="@{/user/checkout}" class="axil-btn btn-bg-secondary checkout-btn" th:text="#{cart.checkout}">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<div th:insert="~{user/fragments/script::script}"></div>
+
+</body>
+</html>

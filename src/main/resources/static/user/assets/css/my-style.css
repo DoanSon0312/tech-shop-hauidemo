@@ -1,0 +1,255 @@
+.cart-action li.select-option .add-to-cart-btn {
+    position: relative;
+    height: 40px;
+    line-height: 39px;
+    padding: 0 18px;
+    display: block;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-white);
+    background-color: var(--color-secondary);
+    transition: .3s;
+    box-shadow: 0 16px 32px 0 rgba(0, 0, 0, .06);
+    position: relative;
+    z-index: 1;
+    border: none;
+    cursor: pointer;
+}
+
+.axil-product .cart-action li.select-option .add-to-cart-btn:before {
+    content: "";
+    height: 100%;
+    width: 100%;
+    background-color: var(--color-secondary);
+    border-radius: 4px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    transition: transform .5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.axil-product .cart-action li.select-option .add-to-cart-btn:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+.axil-product .cart-action li.select-option .add-to-cart-btn:hover:before {
+    transform: scale(1.1);
+}
+
+/* CSS cho card sản phẩm đồng đều - FIXED IMAGE HEIGHT */
+.axil-product.product-style-one {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+}
+
+.axil-product.product-style-one:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    border-color: #007bff;
+}
+
+/* FIX: Thumbnail cao hơn và không bị che */
+.axil-product .thumbnail {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    height: 280px; /* Tăng chiều cao lên */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+/* FIX: Ảnh hiển thị toàn bộ không bị crop */
+.axil-product .thumbnail img {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Thay đổi từ cover thành contain */
+    transition: transform 0.3s ease;
+    object-position: center;
+}
+
+.axil-product:hover .thumbnail img {
+    transform: scale(1);
+}
+
+/* Label giảm giá */
+.label-block.label-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+}
+
+.product-badget {
+    background: #e74c3c;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Nội dung sản phẩm */
+.axil-product .product-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.axil-product .product-content .inner {
+    flex-grow: 1;
+}
+
+/* Tiêu đề sản phẩm */
+.axil-product .title {
+    margin-bottom: 10px;
+    line-height: 1.3;
+    min-height: 2.6em;
+    overflow: hidden;
+}
+
+.axil-product .title a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.axil-product .title a:hover {
+    color: #007bff;
+}
+
+/* Giá sản phẩm */
+.product-price-variant {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    flex-wrap: nowrap;
+}
+.product-price-variant-shop{
+    flex-wrap: wrap;
+}
+
+.current-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e74c3c;
+    white-space: nowrap;
+}
+
+.old-price {
+    font-size: 14px;
+    color: #999;
+    text-decoration: line-through;
+    white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+    .product-price-variant {
+        flex-wrap: wrap;
+    }
+}
+
+/* Grid layout */
+.row--15 {
+    margin: -10px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row--15 > .col-xl-3 {
+    padding: 15px;
+}
+
+.mb--30 {
+    margin-bottom: 30px;
+    display: flex;
+}
+
+/* Đảm bảo tất cả card cùng chiều cao */
+.col-xl-3.col-lg-4.col-sm-6.col-12.mb--30 {
+    display: flex;
+}
+
+/* Responsive với chiều cao ảnh phù hợp */
+@media (max-width: 1199px) {
+    .axil-product .thumbnail {
+        height: 200px;
+    }
+}
+
+@media (max-width: 991px) {
+    .axil-product .thumbnail {
+        height: 180px;
+    }
+}
+
+@media (max-width: 767px) {
+    .axil-product .thumbnail {
+        height: 160px;
+    }
+
+    .axil-product .title a {
+        font-size: 15px;
+    }
+
+    .current-price {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 575px) {
+    .axil-product .thumbnail {
+        height: 150px;
+    }
+}
+
+/* FIX: Đảm bảo container không bị overflow */
+.explore-product-activation {
+    overflow: visible;
+}
+
+.slick-single-layout {
+    overflow: visible;
+}
+
+/* FIX: Cho các sản phẩm có ảnh dọc và ngang */
+.thumbnail.portrait img {
+    width: auto;
+    height: 85%;
+}
+
+.thumbnail.landscape img {
+    width: 85%;
+    height: auto;
+}
+.axil-categorie-area .categrie-product {
+    height: 180px; /* Chiều cao cố định */
+}
+.axil-categorie-area .categrie-product img {
+    height: 100px; /* Tăng từ 80px lên 100px */
+    object-fit: contain;
+}

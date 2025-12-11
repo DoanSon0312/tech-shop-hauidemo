@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head th:insert="~{/shipper/fragments/head::head}">
+  <body class="  ">
+   <!-- loader Start -->
+   <div id="loading">
+    <div id="loading-center">
+    </div>
+</div>
+<!-- loader END -->
+<!-- Wrapper Start -->
+<div class="wrapper">
+
+    <div th:insert="~{/shipper/fragments/sidebar::sidebar}"></div>
+    <div th:insert="~{/shipper/fragments/navbar::navbar}"></div>
+    <div th:insert="~{/shipper/fragments/header::header}"></div>
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card card-block card-stretch card-height-helf">
+                          <div class="card-body">
+                              <div class="d-flex align-items-top justify-content-between">
+                                  <div class="">
+                                      <p class="mb-0">Income</p>
+                                      <h5 th:text="${totalPrice}"></h5>
+                                  </div>
+                                  <div class="card-header-toolbar d-flex align-items-center">
+                                      <div class="dropdown">
+                                                <span class="dropdown-toggle dropdown-bg btn" id="dropdownMenuButton003"
+                                                      data-toggle="dropdown">
+                                                    This Month<i class="ri-arrow-down-s-line ml-1"></i>
+                                                </span>
+                                          <div class="dropdown-menu dropdown-menu-right shadow-none"
+                                               aria-labelledby="dropdownMenuButton003">
+                                              <a class="dropdown-item" href="#">Year</a>
+                                              <a class="dropdown-item" href="#">Month</a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div id="layout1-chart-3" class="layout-chart-1"></div>
+                          </div>
+                      </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card card-block card-stretch card-height-helf">
+                          <div class="card-body">
+                              <div class="d-flex align-items-top justify-content-between">
+                                  <div class="">
+                                      <p class="mb-0">Total Orders</p>
+                                      <h5 th:text="${orderList.size()}"></h5>
+                                  </div>
+                                  <div class="card-header-toolbar d-flex align-items-center">
+                                      <div class="dropdown">
+                                                <span class="dropdown-toggle dropdown-bg btn" id="dropdownMenuButton004"
+                                                      data-toggle="dropdown">
+                                                    This Month<i class="ri-arrow-down-s-line ml-1"></i>
+                                                </span>
+                                          <div class="dropdown-menu dropdown-menu-right shadow-none"
+                                               aria-labelledby="dropdownMenuButton004">
+                                              <a class="dropdown-item" href="#">Year</a>
+                                              <a class="dropdown-item" href="#">Month</a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div id="layout1-chart-4" class="layout-chart-2"></div>
+                          </div>
+                      </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                        <div>
+                            <h4 class="mb-3">Order List</h4>
+                        </div>
+                        <div class="card-header-toolbar d-flex align-items-center">
+                            <div class="dropdown">
+                                <form th:action="@{/shipper/summary}" method="get">
+                                    <select name="year" class="dropdown-toggle dropdown-bg btn" onchange="this.form.submit()">
+                                        <option th:if="${year == null}" th:selected="true" disabled>Choose Year</option>
+                                        <option th:each="y : ${#numbers.sequence(currentYear - 4, currentYear)}"
+                                                th:value="${y}"
+                                                th:text="${y}"
+                                                th:selected="${y == year}">
+                                        </option>
+                                    </select>
+                                    <select name="month" class="dropdown-toggle dropdown-bg btn" onchange="this.form.submit()">
+                                        <option th:if="${month == null}" th:selected="true" disabled>Choose Month</option>
+                                        <option th:each="m : ${#numbers.sequence(1, 12)}"
+                                                th:value="${m}"
+                                                th:text="${m}"
+                                                th:selected="${m == month}">
+                                        </option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive rounded mb-3">
+                        <table class="data-table table mb-0 tbl-server-info">
+                            <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+                                <th>
+                                    <div class="checkbox d-inline-block">
+                                        <input type="checkbox" class="checkbox-input" id="checkbox1">
+                                        <label for="checkbox1" class="mb-0"></label>
+                                    </div>
+                                </th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total price</th>
+                                <th>Payment</th>
+                                <th>Address</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody class="ligth-body">
+                            <tr th:each="order : ${orderList}">
+                                <td>
+                                    <div class="checkbox d-inline-block">
+                                        <input type="checkbox" class="checkbox-input" id="checkbox2">
+                                        <label for="checkbox2" class="mb-0"></label>
+                                    </div>
+                                </td>
+                                <td th:text="${order.updatedAt}"></td>
+                                <td th:text="${order.user.lastName+' '+order.user.firstName}"></td>
+                                <td th:text="${#numbers.formatCurrency(order.totalPrice)}"></td>
+                                <td th:text="${order.payment.name}"></td>
+                                <td>
+                                    <span th:text="|${order.address.getDetailLocation()}, ${order.address.getStreet()}, ${order.address.getDistrict()}, ${order.address.getCity()}|"></span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center list-action">
+                                        <a class="badge badge-info mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="View"
+                                           th:href="@{/shipper/shipping/{id}(id=${order.id})}"><i class="ri-eye-line mr-0"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+  <!-- Page end  -->
+        </div>
+    </div>
+</div>
+<!-- Wrapper End-->
+    <!-- Backend Bundle JavaScript -->
+   <div th:insert="~{/shipper/fragments/footer::footer}"></div>
+   <div th:insert="~{/shipper/fragments/script::script}"></div>
+  </body>
+</html>
