@@ -348,8 +348,8 @@ public class ProductController {
         }
         productDTO.setCategoryId(categoryId);
         if (productService.createProduct(productDTO, file)) {
-            Product savedProduct = productService.findByName(productDTO.getName());
-            productImageService.createProductImages(savedProduct.getId(), file);
+//            Product savedProduct = productService.findByName(productDTO.getName());
+//            productImageService.createProductImages(savedProduct.getId(), file);
             return "redirect:/manager/products";
         }
         return "manager/products/addproduct";

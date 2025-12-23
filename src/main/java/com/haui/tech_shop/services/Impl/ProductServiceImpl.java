@@ -1,5 +1,7 @@
 package com.haui.tech_shop.services.Impl;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.haui.tech_shop.builder.ProductFilterBuilder;
 import com.haui.tech_shop.convert.ProductFilterBuilderConverter;
 import com.haui.tech_shop.dtos.requests.ProductRequest;
@@ -42,7 +44,7 @@ public class ProductServiceImpl implements IProductService {
     private final OrderRepository orderRepository;
     private final CartDetailRepository cartDetailRepository;
     private final RatingRepository ratingRepository;
-    private final Path root = Paths.get("./uploads");
+    private final Cloudinary cloudinary;
 
     @Override
     public List<ProductResponse> findByNameContaining(String name) {
@@ -76,11 +78,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public void init() {
-        try {
-            Files.createDirectories(root);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not initialize folder for upload!");
-        }
+
     }
 
     @Override
@@ -92,7 +90,8 @@ public class ProductServiceImpl implements IProductService {
     public ProductResponse getProductResponse(Long productId) {
         Product p = productRepository.findById(productId).get();
         String oldPrice = Constant.formatter.format(p.getPrice().add(p.getPrice().multiply(BigDecimal.valueOf(0.2))));
-        boolean isUrlImage = p.getThumbnail() != null && p.getThumbnail().startsWith("https");
+        // Kiểm tra URL ảnh
+        boolean isUrlImage = p.getThumbnail() != null && p.getThumbnail().startsWith("http");
         return ProductResponse.builder()
                 .id(p.getId())
                 .name(p.getName())
@@ -123,11 +122,8 @@ public class ProductServiceImpl implements IProductService {
 
     private ProductResponse convertToProductResponse(Product p) {
         String oldPrice = Constant.formatter.format(p.getPrice().add(BigDecimal.valueOf(2000000)));
-        boolean isUrlImage = false;
-
-        if (p.getThumbnail() != null && p.getThumbnail().startsWith("https")) {
-            isUrlImage = true;
-        }
+        // Logic kiểm tra ảnh URL
+        boolean isUrlImage = p.getThumbnail() != null && p.getThumbnail().startsWith("http");
 
         return ProductResponse.builder()
                 .id(p.getId())
@@ -141,33 +137,58 @@ public class ProductServiceImpl implements IProductService {
 
     public String saveImage(MultipartFile file) {
         try {
-            // get file name
-            String fileName = file.getOriginalFilename();
-            // generate code random base on UUID
-            String uniqueFileName = UUID.randomUUID().toString() + "_" + LocalDate.now() + "_" + fileName;
-            Files.copy(file.getInputStream(), this.root.resolve(uniqueFileName), StandardCopyOption.REPLACE_EXISTING);
-            return uniqueFileName;
-        } catch (Exception e) {
-            if (e instanceof FileAlreadyExistsException) {
-                throw new RuntimeException("Filename already exists.");
-            }
+            String originalFilename = file.getOriginalFilename();
+            String uniqueFileName = UUID.randomUUID().toString() + "_" + System.currentTimeMillis();
 
-            throw new RuntimeException(e.getMessage());
+            // Cấu hình tham số upload
+            Map params = ObjectUtils.asMap(
+                    "public_id", uniqueFileName,
+                    "folder", "tech_shop_products" // Folder trên Cloudinary
+            );
+
+            // Upload và lấy về URL
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+            return uploadResult.get("secure_url").toString();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi upload ảnh lên Cloudinary: " + e.getMessage());
         }
     }
 
     @Override
-    public boolean deleteImage(String filename) {
+    public boolean deleteImage(String url) {
         try {
-            java.nio.file.Path oldImage = Paths.get("uploads/" + filename);
-            if (!oldImage.getFileName().equals(filename) && Files.exists(oldImage)) {
-                Files.delete(oldImage);
+            if (url == null || url.isEmpty()) return false;
+
+            // Lấy public_id từ URL
+            String publicId = getPublicIdFromUrl(url);
+            if (publicId != null) {
+                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
                 return true;
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            System.out.println("Lỗi xóa ảnh trên Cloudinary: " + e.getMessage());
+            // Không throw exception để tránh crash luồng chính nếu xóa ảnh thất bại
         }
         return false;
+    }
+
+    private String getPublicIdFromUrl(String url) {
+        try {
+            // URL ví dụ: https://res.cloudinary.com/demo/image/upload/v12345678/tech_shop_products/anh1.jpg
+            int startIndex = url.lastIndexOf("/");
+            String filenameWithExt = url.substring(startIndex + 1); // anh1.jpg
+            String filename = filenameWithExt.substring(0, filenameWithExt.lastIndexOf(".")); // anh1
+
+            // Nếu bạn dùng folder "tech_shop_products", cần return "tech_shop_products/filename"
+            // Cách đơn giản nhất là dựa vào logic folder bạn đã đặt
+            if (url.contains("tech_shop_products")) {
+                return "tech_shop_products/" + filename;
+            }
+            return filename;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -177,12 +198,13 @@ public class ProductServiceImpl implements IProductService {
         try {
             String thumbnail = "";
             if (file == null) {
-                thumbnail = "default-product.jpg";
+                // Bạn có thể để link ảnh default online hoặc giữ nguyên
+                thumbnail = "https://res.cloudinary.com/djxfn3ykc/image/upload/v1/tech_shop_products/default-product.jpg";
             } else {
                 if (!isValidSuffixImage(Objects.requireNonNull(file.getOriginalFilename()))) {
                     throw new BadRequestException("Image is not valid");
                 }
-                thumbnail = saveImage(file);
+                thumbnail = saveImage(file); // Hàm này giờ trả về URL HTTPS
             }
             Product product = Product.builder()
                     .name(productRequest.getName())
@@ -207,7 +229,7 @@ public class ProductServiceImpl implements IProductService {
             productRepository.save(product);
             return true;
         } catch (IOException ioe) {
-            throw new IOException("Cannot create product" + ioe.getMessage());
+            throw new IOException("Cannot create product: " + ioe.getMessage());
         }
     }
 
@@ -220,8 +242,9 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Product updateProduct(Long productId, ProductRequest productRequest) throws IOException {
         Brand brandExisting = brandRepository.findById(productRequest.getBrandId()).get();
-        // get product old by id
         Product existingProduct = productRepository.findById(productId).get();
+
+        // Update các trường thông tin
         existingProduct.setName(productRequest.getName());
         existingProduct.setDescription(productRequest.getDescription());
         existingProduct.setPrice(productRequest.getPrice());
@@ -239,7 +262,7 @@ public class ProductServiceImpl implements IProductService {
         existingProduct.setWeight(productRequest.getWeight());
         existingProduct.setBrand(brandExisting);
         existingProduct.setUpdatedAt(LocalDate.now());
-        // create if chua ton tai, update if ton tai
+
         return productRepository.save(existingProduct);
     }
 
@@ -248,17 +271,18 @@ public class ProductServiceImpl implements IProductService {
         Brand brandExisting = brandRepository.findById(productRequest.getBrandId()).get();
         Product existingProduct = productRepository.findById(productId).get();
 
-        String thumbnail = "";
-        if (file == null) {
-            thumbnail = "/uploads/default-product.jpg";
-        } else {
+        String thumbnail = existingProduct.getThumbnail();
+        if (file != null && !file.isEmpty()) {
             if (!isValidSuffixImage(Objects.requireNonNull(file.getOriginalFilename()))) {
                 throw new BadRequestException("Image is not valid");
             }
+            // Xóa ảnh cũ trên Cloudinary (nếu có)
             deleteImage(existingProduct.getThumbnail());
+            // Upload ảnh mới
             thumbnail = saveImage(file);
         }
-        // get product old by id
+
+        // Update thông tin
         existingProduct.setName(productRequest.getName());
         existingProduct.setDescription(productRequest.getDescription());
         existingProduct.setPrice(productRequest.getPrice());
@@ -277,7 +301,7 @@ public class ProductServiceImpl implements IProductService {
         existingProduct.setThumbnail(thumbnail);
         existingProduct.setBrand(brandExisting);
         existingProduct.setUpdatedAt(LocalDate.now());
-        // create if chua ton tai, update if ton tai
+
         return productRepository.save(existingProduct);
     }
 

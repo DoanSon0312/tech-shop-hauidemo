@@ -97,5 +97,10 @@ currency:
 
 gemini:
   api:
-    key: "AIzaSyAItnzWQIW4MhjHxyIQCWA2k4onpA2UV2Q"
+    key: "AIzaSyB2n60MXJgLLAN0NLMYuudF3WOm3Aa_fok"
     url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+
+cloudinary:
+  cloud-name: "djxfn3ykc"
+  api-key: "544649756451829"
+  api-secret: "x35UndH2C9fuFqKn2cmKfDH5k4I"

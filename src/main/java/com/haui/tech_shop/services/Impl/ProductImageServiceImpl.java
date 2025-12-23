@@ -1,5 +1,7 @@
 package com.haui.tech_shop.services.Impl;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.haui.tech_shop.dtos.responses.ProductImageRes;
 import com.haui.tech_shop.entities.Product;
 import com.haui.tech_shop.entities.ProductImage;
@@ -12,21 +14,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProductImageServiceImpl implements IProductImageService {
-    private final Path root = Paths.get("./uploads");
+
     private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;
+    private final Cloudinary cloudinary; // Inject Cloudinary vào đây
 
     @Override
     public void deleteAllByProduct_Id(Long productId) {
         List<ProductImage> productImages = productImageRepository.findByProductId(productId);
         productImages.forEach(productImage -> {
+            // Xóa ảnh trên Cloudinary trước khi xóa trong DB
             deleteImage(productImage.getUrl());
             productImageRepository.deleteById(productImage.getId());
         });
@@ -35,48 +37,56 @@ public class ProductImageServiceImpl implements IProductImageService {
     @Override
     public boolean createProductImages(Long productId, MultipartFile file) throws IOException {
         Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) return false;
+
         try {
-            String thumbnail = "";
-            if (file == null) {
-                thumbnail = "/uploads/default-product.jpg";
+            String imageUrl = "";
+            if (file == null || file.isEmpty()) {
+                // Có thể để ảnh mặc định hoặc bỏ qua
+                return false;
             } else {
                 if (!isValidSuffixImage(Objects.requireNonNull(file.getOriginalFilename()))) {
                     throw new BadRequestException("Image is not valid");
                 }
-                thumbnail = saveImage(file);
+                // Upload lên Cloudinary và lấy URL về
+                imageUrl = saveImage(file);
             }
+
             ProductImage productImage = ProductImage.builder()
                     .product(product)
-                    .url(thumbnail)
+                    .url(imageUrl) // Lưu URL của Cloudinary vào DB
                     .build();
             productImageRepository.save(productImage);
             return true;
         } catch (IOException ioe) {
-            throw new IOException("Cannot create product" + ioe.getMessage());
+            throw new IOException("Cannot create product image: " + ioe.getMessage());
         }
     }
 
-    public String saveImage(MultipartFile file) {
-        try {
-            // get file name
-            String fileName = file.getOriginalFilename();
-            // generate code random base on UUID
-            String uniqueFileName = UUID.randomUUID().toString() + "_" + LocalDate.now() + "_" + fileName;
-            Files.copy(file.getInputStream(), this.root.resolve(uniqueFileName), StandardCopyOption.REPLACE_EXISTING);
-            return uniqueFileName;
-        } catch (Exception e) {
-            if (e instanceof FileAlreadyExistsException) {
-                throw new RuntimeException("Filename already exists.");
-            }
+    // Hàm này được sửa đổi để upload lên Cloudinary
+    public String saveImage(MultipartFile file) throws IOException {
+        // Tạo tên file unique (tùy chọn, Cloudinary có thể tự sinh public_id)
+        String originalFilename = file.getOriginalFilename();
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + System.currentTimeMillis();
 
-            throw new RuntimeException(e.getMessage());
-        }
+        // Tham số cấu hình upload
+        Map params = ObjectUtils.asMap(
+                "public_id", uniqueFileName, // Đặt tên file trên cloud
+                "folder", "tech_shop_products" // Gom ảnh vào thư mục riêng cho gọn
+        );
+
+        // Thực hiện upload
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+
+        // Trả về đường dẫn bảo mật (https)
+        return uploadResult.get("secure_url").toString();
     }
 
     private boolean isValidSuffixImage(String img) {
-        return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
-                img.endsWith(".png") || img.endsWith(".gif") ||
-                img.endsWith(".bmp");
+        String lowerCaseImg = img.toLowerCase();
+        return lowerCaseImg.endsWith(".jpg") || lowerCaseImg.endsWith(".jpeg") ||
+                lowerCaseImg.endsWith(".png") || lowerCaseImg.endsWith(".gif") ||
+                lowerCaseImg.endsWith(".bmp");
     }
 
     @Override
@@ -91,28 +101,56 @@ public class ProductImageServiceImpl implements IProductImageService {
                 .map(productImage -> ProductImageRes.builder()
                         .url(productImage.getUrl())
                         .product(productImage.getProduct())
-                        .isUrlImage(productImage.getProduct().getThumbnail().contains("https"))
+                        .isUrlImage(true) // Vì giờ tất cả đều là URL từ Cloudinary
                         .build()).toList();
     }
 
     @Override
     public void deleteById(Integer integer) {
         ProductImage productImage = productImageRepository.findById(integer).orElse(null);
-        deleteImage(productImage.getUrl());
-        productImageRepository.deleteById(integer);
+        if (productImage != null) {
+            deleteImage(productImage.getUrl());
+            productImageRepository.deleteById(integer);
+        }
     }
 
-    public boolean deleteImage(String filename) {
+    // Hàm xóa ảnh trên Cloudinary
+    public boolean deleteImage(String url) {
         try {
-            java.nio.file.Path oldImage = Paths.get("uploads/" + filename);
-            if (Files.exists(oldImage)) {
-                Files.delete(oldImage);
+            // Cần lấy public_id từ URL để xóa
+            // URL dạng: https://res.cloudinary.com/.../folder/filename.jpg
+            String publicId = getPublicIdFromUrl(url);
+
+            if (publicId != null) {
+                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
                 return true;
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            e.printStackTrace(); // Log lỗi nhưng không throw để tránh crash luồng chính
         }
         return false;
+    }
+
+    // Hàm phụ trợ để tách Public ID từ URL
+    private String getPublicIdFromUrl(String url) {
+        if (url == null || url.isEmpty()) return null;
+        try {
+            // Tách lấy phần sau dấu / cuối cùng và trước dấu . (extension)
+            // Ví dụ đơn giản (Cần điều chỉnh nếu URL phức tạp hơn hoặc có versioning)
+            int startIndex = url.lastIndexOf("/");
+            int endIndex = url.lastIndexOf(".");
+
+            // Nếu dùng folder, cần xử lý thêm.
+            // Cách an toàn nhất cho cấu trúc tech_shop_products/filename:
+            String[] parts = url.split("/");
+            String filenameWithExt = parts[parts.length - 1];
+            String filename = filenameWithExt.substring(0, filenameWithExt.lastIndexOf("."));
+
+            // Nếu có folder "tech_shop_products"
+            return "tech_shop_products/" + filename;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
