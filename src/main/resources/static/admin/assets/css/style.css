@@ -2272,6 +2272,21 @@ input[type="text"][hidden] {
           background-color: #ffa500; /* cam sáng */
         }
 
+        .bg-lightgray {
+          background-color: #6c757d; /* xám trung tính */
+          color: #fff;
+        }
+
+        .bg-lightblue {
+          background-color: #007bff; /* xanh dương */
+          color: #fff;
+        }
+
+        .bg-lightdark {
+          background-color: #343a40; /* đen xám */
+          color: #fff;
+        }
+
         .bg-lightgreen {
           background-color: #28a745; /* xanh lá */
         }
@@ -2286,8 +2301,8 @@ input[type="text"][hidden] {
           transition: all 0.2s ease-in-out;
         }
         .bg-lightpurple {
-              background-color: #e0cffc;
-              color: #6f42c1;
+           background-color: #e0cffc;
+           color: #6f42c1;
         }
         .wd-300{
         width: auto;

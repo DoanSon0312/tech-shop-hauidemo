@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINTS = {"/register", "/user/home", "/api/chat", "/user/contact", "/user/about-us", "/forgot-password", "/verify-account",
+    private final String[] PUBLIC_ENDPOINTS = {"/register", "/user/home", "/api/chat", "/user/contact", "/user/about-us", "/forgot-password", "/test/**", "/verify-account",
         "/user/products/**"
     };
 

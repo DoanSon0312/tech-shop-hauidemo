@@ -142,7 +142,7 @@
                                     <form th:if="${!order.get().getStatus().equals(orderStatus[3])}"
                                           th:action="@{/manager/orders/cancelled(id=${order.get().getId()})}"
                                           method="post">
-                                        <input class="btn btn-danger" style="padding: 13px;" type="submit" th:value="Cancelled">
+                                        <input class="btn btn-danger" type="submit" th:value="Cancelled">
                                     </form>
                                 </div>
                             </div>

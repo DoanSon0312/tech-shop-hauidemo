@@ -88,36 +88,6 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public void createOrder(User user, BigDecimal totalPrice, Voucher voucher, Payment payment, Address address,
-                            Long cartId,
-                            List<CartDetailResponse> cartDetailList) {
-        Order order = new Order();
-        order.setTotalPrice(totalPrice);
-        order.setActive(true);
-        order.setUser(user);
-        order.setVoucher(voucher);
-        // Decrease voucher quantity
-        voucherService.decreaseQuantity(voucher.getId());
-        order.setPayment(payment);
-        order.setAddress(address);
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CartDetailResponse cartDetailResponse : cartDetailList) {
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrder(order);
-            orderDetail.setProduct(productService.findByName(cartDetailResponse.getProductName()));
-            orderDetail.setQuantity(cartDetailResponse.getQuantity());
-            // Decrease product quantity
-            productService.decreaseStockQuantity(cartDetailResponse.getProductId(), cartDetailResponse.getQuantity());
-            orderDetail.setTotalPrice(cartDetailResponse.getTotalPrice());
-            orderDetails.add(orderDetail);
-            CartDetail cartDetail = cartDetailService.findByCart_IdAndProductId(cartId, cartDetailResponse.getProductId());
-            cartDetailService.delete(cartDetail);
-        }
-        order.setOrderDetails(orderDetails);
-        orderRepository.save(order);
-    }
-
-    @Override
     @Transactional
     public Order createOrder(User user, BigDecimal totalPrice, Payment payment,
                              Address address, Long cartId,
@@ -132,6 +102,13 @@ public class OrderServiceImpl implements IOrderService {
         order.setUser(user);
         order.setPayment(payment);
         order.setAddress(address);
+
+        if (payment.getName().equalsIgnoreCase("vnpay")
+                || payment.getName().equalsIgnoreCase("paypal")) {
+            order.setStatus(OrderStatus.AWAITING_PAYMENT);
+        } else {
+            order.setStatus(OrderStatus.PENDING); // COD
+        }
 
         // Tạo order details
         List<OrderDetail> orderDetails = createOrderDetails(order, cartId, cartDetailList);
@@ -334,6 +311,19 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
+    @Override
+    public void deleteFailOrder(Long orderId) {
+        try {
+            Order order = orderRepository.findById(orderId).orElse(null);
+            if (order != null) {
+                // Không cần restore kho vì chưa trừ
+                orderRepository.deleteById(order.getId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -411,15 +401,15 @@ public class OrderServiceImpl implements IOrderService {
             orderDetails.add(orderDetail);
 
             // Giảm số lượng tồn kho sản phẩm
-            productService.decreaseStockQuantity(cartDetailResponse.getProductId(),
-                    cartDetailResponse.getQuantity());
+//            productService.decreaseStockQuantity(cartDetailResponse.getProductId(),
+//                    cartDetailResponse.getQuantity());
 
             // Xóa cart detail
-            CartDetail cartDetail = cartDetailService
-                    .findByCart_IdAndProductId(cartId, cartDetailResponse.getProductId());
-            if (cartDetail != null) {
-                cartDetailService.delete(cartDetail);
-            }
+//            CartDetail cartDetail = cartDetailService
+//                    .findByCart_IdAndProductId(cartId, cartDetailResponse.getProductId());
+//            if (cartDetail != null) {
+//                cartDetailService.delete(cartDetail);
+//            }
         }
 
         return orderDetails;
@@ -523,10 +513,4 @@ public class OrderServiceImpl implements IOrderService {
                 "year", LocalDate.now().getYear()
         );
     }
-
-
-
-
-
-
 }

@@ -77,9 +77,12 @@
                 <td th:text="${order.getTotalPrice()}">
                 </td>
                 <td>
-                                    <span class="badges bg-lightyellow"
-                                          th:if="${order.getStatus().equals(orderStatus[0])}">Pending
-                                    </span>
+                  <span class="badges bg-lightgray"
+                        th:if="${order.getStatus().equals(orderStatus[6])}">Awaiting Payment
+                  </span>
+                  <span class="badges bg-lightyellow"
+                        th:if="${order.getStatus().equals(orderStatus[0])}">Pending
+                  </span>
                   <span class="badges bg-lightpurple"
                         th:if="${order.getStatus().equals(orderStatus[1])}">Shipping
                                     </span>
@@ -88,7 +91,13 @@
                                     </span>
                   <span class="badges bg-lightred"
                         th:if="${order.getStatus().equals(orderStatus[3])}">Cancelled
-                                    </span>
+                  </span>
+                  <span class="badges bg-lightblue"
+                        th:if="${order.getStatus().equals(orderStatus[4])}">Refund
+                  </span>
+                  <span class="badges bg-lightdark"
+                        th:if="${order.getStatus().equals(orderStatus[5])}">Completed
+                  </span>
                 </td>
                 <td th:text="${order.getCreatedAt()}"></td>
                 <td th:text="${order.getPayment().getName()}"></td>

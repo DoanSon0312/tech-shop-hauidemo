@@ -104,3 +104,18 @@ cloudinary:
   cloud-name: "djxfn3ykc"
   api-key: "544649756451829"
   api-secret: "x35UndH2C9fuFqKn2cmKfDH5k4I"
+
+# Slack & Seq config
+slack:
+  webhook:
+    url: "https://hooks.slack.com/services/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"
+
+seq:
+  server:
+    url: "http://localhost:5341"  # URL giao diện web Seq
+  api:
+    url: "http://localhost:5341"  # URL API Seq
+
+betterstack:
+  source-token: "H4cSrAktzBaTiaPuZstCNXKZ"
+  dashboard-url: "https://telemetry.betterstack.com/team/t519732/tail?s=2323837"

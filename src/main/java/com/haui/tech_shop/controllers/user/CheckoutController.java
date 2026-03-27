@@ -38,6 +38,7 @@ public class CheckoutController {
     private final CartService cartService;
     private final ICartDetailService cartDetailService;
     private final CurrencyService currencyService;
+    private final IProductService productService;
 
     @GetMapping("")
     public String checkout(Model model, HttpSession session, @RequestParam("selectedProducts")List<Long> selectedProducts) {
@@ -63,7 +64,11 @@ public class CheckoutController {
         BigDecimal totalPriceToPayment = BigDecimal.ZERO;
 
         for (Long productId : selectedProducts) {
-            CartDetailResponse cartDetailResponse = cartDetailService.convertToCartDetailReponse(cartDetailService.findByCart_IdAndProductId(cart.getId(), productId));
+            CartDetail cartDetail = cartDetailService.findByCart_IdAndProductId(cart.getId(), productId);
+
+            if (cartDetail == null) continue; // ← thêm dòng này
+
+            CartDetailResponse cartDetailResponse = cartDetailService.convertToCartDetailReponse(cartDetail);
             totalPriceToPayment = totalPriceToPayment.add(cartDetailResponse.getTotalPrice());
             cartDetailResponseToBuy.add(cartDetailResponse);
         }
@@ -135,6 +140,7 @@ public class CheckoutController {
                 return response;
             }
             cart = cartOptional.get();
+            session.setAttribute("cartId", cart.getId());
 
             // Update the session with new price
             session.setAttribute("totalPriceToPayment", newPrice);
@@ -169,6 +175,17 @@ public class CheckoutController {
                 redirectUrl = "/user/checkout/vnpay";
             } else {
                 // COD - chuyển thẳng đến trang thành công, thêm param paymentMethod
+                Cart cartFinal = cart;
+                for (CartDetailResponse item : cartDetailList) {
+                    productService.decreaseStockQuantity(item.getProductId(), item.getQuantity());
+
+                    CartDetail cartDetail = cartDetailService
+                            .findByCart_IdAndProductId(cartFinal.getId(), item.getProductId());
+                    if (cartDetail != null) {
+                        cartDetailService.delete(cartDetail);
+                    }
+                }
+                orderService.orderPending(order.getId());
                 redirectUrl = "/user/order-success?orderId=" + order.getId() + "&paymentMethod=" + payment.getName();
             }
 
@@ -279,7 +296,7 @@ public class CheckoutController {
             session.setAttribute("paypalPaymentId", paymentId);
 
             // Chuyển hướng đến trang thành công
-//            return "redirect:/user/checkout/success";
+            // return "redirect:/user/checkout/success";
             return "redirect:/user/home";
         } catch (PayPalRESTException e) {
             e.printStackTrace();
@@ -312,6 +329,5 @@ public class CheckoutController {
         }
 
     }
-
 
 }

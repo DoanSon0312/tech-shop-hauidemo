@@ -153,6 +153,20 @@
 			<version>1.36.0</version>
 		</dependency>
 
+		<!-- Logback GELF appender - gửi log structured lên Seq -->
+		<dependency>
+			<groupId>de.siegmar</groupId>
+			<artifactId>logback-gelf</artifactId>
+			<version>6.1.0</version>
+		</dependency>
+
+		<!-- Slack Webhook - gửi thông báo lên Slack -->
+		<dependency>
+			<groupId>com.slack.api</groupId>
+			<artifactId>slack-api-client</artifactId>
+			<version>1.36.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

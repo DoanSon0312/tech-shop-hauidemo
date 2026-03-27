@@ -24,10 +24,6 @@ public interface IOrderService {
     void orderRefund(Long id);
     void orderCompleted(Long id);
 
-    void createOrder(User user, BigDecimal totalPrice, Voucher voucher, Payment payment, Address address,
-                     Long cartId,
-                     List<CartDetailResponse> cartDetailList);
-
     Order createOrder(User user, BigDecimal totalPrice, Payment payment, Address address,
                         Long cartId,
                         List<CartDetailResponse> cartDetailList);
@@ -67,6 +63,8 @@ public interface IOrderService {
     List<Order> getRecentlyOrders();
 
     void deleteFailOrder();
+    void deleteFailOrder(Long orderId);
+
     Optional<Order> findOrderByIdWithDetails(Long orderId);
     Order createOrderWithVoucher(User user, BigDecimal totalPrice, Voucher voucher,
                                  Payment payment, Address address, Long cartId,

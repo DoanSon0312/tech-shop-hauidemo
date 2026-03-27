@@ -1,7 +1,12 @@
 package com.haui.tech_shop.vnpay;
 
+import com.haui.tech_shop.dtos.responses.CartDetailResponse;
+import com.haui.tech_shop.entities.Cart;
+import com.haui.tech_shop.entities.CartDetail;
 import com.haui.tech_shop.entities.Order;
+import com.haui.tech_shop.services.Impl.CartDetailServiceImpl;
 import com.haui.tech_shop.services.Impl.OrderServiceImpl;
+import com.haui.tech_shop.services.Impl.ProductServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -22,6 +28,12 @@ public class VNPayController {
 
     @Autowired
     private OrderServiceImpl orderService;
+
+    @Autowired
+    private ProductServiceImpl productService;
+
+    @Autowired
+    private CartDetailServiceImpl cartDetailService;
 
     // Chuyển hướng người dùng đến cổng thanh toán VNPAY
     @GetMapping({"/user/checkout/vnpay"})
@@ -44,22 +56,18 @@ public class VNPayController {
     public String paymentCompleted(HttpServletRequest request, Model model, HttpSession session) {
         int paymentStatus = vnPayService.orderReturn(request);
 
-        // Lấy thông tin từ VNPAY trả về
-        String orderInfo = request.getParameter("vnp_OrderInfo"); // VD: "Thanh toán đơn hàng #51"
+        String orderInfo = request.getParameter("vnp_OrderInfo");
         String paymentTime = request.getParameter("vnp_PayDate");
         String transactionId = request.getParameter("vnp_TransactionNo");
         String totalPrice = request.getParameter("vnp_Amount");
 
-        // Định dạng thời gian
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         LocalDateTime dateTime = LocalDateTime.parse(paymentTime, inputFormatter);
         String formattedDate = dateTime.format(outputFormatter);
 
-        // Chuyển số tiền về dạng VND
         String totalPriceVND = totalPrice.substring(0, totalPrice.length() - 2);
 
-        // Lấy orderId từ chuỗi orderInfo (tách số sau dấu #)
         Long orderId = null;
         if (orderInfo != null && orderInfo.contains("#")) {
             try {
@@ -74,17 +82,34 @@ public class VNPayController {
         model.addAttribute("paymentTime", formattedDate);
         model.addAttribute("transactionId", transactionId);
 
+        // ✅ Lấy từ session TRƯỚC khi vào if/else
+        Long cartId = (Long) session.getAttribute("cartId");
+        List<CartDetailResponse> cartDetailList =
+                (List<CartDetailResponse>) session.getAttribute("cartDetailListToBuy");
+
         if (paymentStatus == 1 && orderId != null) {
-            // ✅ Thanh toán thành công → cập nhật trạng thái đơn hàng
-            orderService.orderPending(orderId); // hoặc orderShipping() theo logic của bạn
+            orderService.orderPending(orderId);
+
+            if (cartId != null && cartDetailList != null) {
+                for (CartDetailResponse item : cartDetailList) {
+                    productService.decreaseStockQuantity(item.getProductId(), item.getQuantity());
+
+                    CartDetail cartDetail =
+                            cartDetailService.findByCart_IdAndProductId(cartId, item.getProductId());
+                    if (cartDetail != null) {
+                        cartDetailService.delete(cartDetail);
+                    }
+                }
+            }
 
             Optional<Order> orderOptional = orderService.findById(orderId);
             orderOptional.ifPresent(order -> model.addAttribute("order", order));
 
-            return "user/orderSuccess"; // trang thông báo thành công
+            return "user/orderSuccess";
         } else {
-            // ❌ Thanh toán thất bại
-            orderService.deleteFailOrder();
+            if (orderId != null) {
+                orderService.deleteFailOrder(orderId);
+            }
             return "user/orderFail";
         }
     }
