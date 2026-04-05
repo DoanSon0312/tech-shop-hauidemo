@@ -181,20 +181,16 @@ public class CheckoutController {
                 redirectUrl = "/user/checkout/paypal";
             } else if (payment.getName().equals("vnpay")) {
                 redirectUrl = "/user/checkout/vnpay";
-            }
-//            else if (payment.getName().equals("payos")) {
-//                // PayOS: đặt trạng thái AWAITING_PAYMENT, chưa trừ stock
-//                orderService.updateOrderStatus(order.getId(), OrderStatus.AWAITING_PAYMENT);
-//                redirectUrl = "/user/checkout/payos?orderId=" + order.getId();
-//
-//            }
-            else if (payment.getName().equals("qr_transfer")) {
+            } else if (payment.getName().equals("payos")) {
+                // PayOS: đặt trạng thái AWAITING_PAYMENT, chưa trừ stock
+                orderService.updateOrderStatus(order.getId(), OrderStatus.AWAITING_PAYMENT);
+                redirectUrl = "/user/checkout/payos?orderId=" + order.getId();
+
+            } else if (payment.getName().equals("qr_transfer")) {
                 // QR Bank Transfer via SePay: đặt trạng thái AWAITING_PAYMENT
                 orderService.updateOrderStatus(order.getId(), OrderStatus.AWAITING_PAYMENT);
                 redirectUrl = "/user/checkout/qr-payment?orderId=" + order.getId();
-            }
-
-            else {
+            } else {
                 // COD - chuyển thẳng đến trang thành công, thêm param paymentMethod
                 Cart cartFinal = cart;
                 for (CartDetailResponse item : cartDetailList) {
