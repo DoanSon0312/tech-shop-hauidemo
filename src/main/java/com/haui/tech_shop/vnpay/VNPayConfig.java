@@ -11,7 +11,7 @@ public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_Returnurl = "/vnpay-payment-return";
     public static String vnp_TmnCode = "C1559CJ9"; // kiểm tra email sau
-    public static String vnp_HashSecret = "U9MCMH9W6IKN130EILF4BSTDTX1X1CYS"; // khi đăng ký Test
+    public static String vnp_HashSecret = "QUNROQZQLNLK7RQ4VO7KNAXIC4ZJECTX"; // khi đăng ký Test
     public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
 

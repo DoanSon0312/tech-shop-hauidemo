@@ -28,6 +28,8 @@ public interface IOrderService {
                         Long cartId,
                         List<CartDetailResponse> cartDetailList);
 
+    void updateOrderStatus(Long orderId, OrderStatus status);
+
     void deleteAll();
 
     List<Order> findAll();

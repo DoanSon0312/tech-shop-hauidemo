@@ -97,7 +97,7 @@ currency:
 
 gemini:
   api:
-    key: "AIzaSyB2n60MXJgLLAN0NLMYuudF3WOm3Aa_fok"
+    key: "AIzaSyDZ3g3GLrgwpDUp8IBBx1eRQPq-KweGptc"
     url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 cloudinary:
@@ -110,12 +110,27 @@ slack:
   webhook:
     url: "https://hooks.slack.com/services/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"
 
-seq:
-  server:
-    url: "http://localhost:5341"  # URL giao diện web Seq
-  api:
-    url: "http://localhost:5341"  # URL API Seq
+#seq:
+#  server:
+#    url: "http://localhost:5341"  # URL giao diện web Seq
+#  api:
+#    url: "http://localhost:5341"  # URL API Seq
 
 betterstack:
   source-token: "H4cSrAktzBaTiaPuZstCNXKZ"
   dashboard-url: "https://telemetry.betterstack.com/team/t519732/tail?s=2323837"
+
+payos:
+  client-id: YOUR_CLIENT_ID
+  api-key: YOUR_API_KEY
+  checksum-key: YOUR_CHECKSUM_KEY
+
+sepay:
+  api-key: "QWPL1DT8E9MQBB3OQM6GRSJ4ONUAGRML2DMTVFFNKU6R0ZYK7HKNTCHPFWPIXJIH"  # Lấy từ https://my.sepay.vn -> API Key
+  bank-account-number: "088832789999"
+  bank-brand: "MB"
+
+vietqr:
+  bank-id: MB
+  account-no: "088832789999"
+  account-name: "DNTSON"

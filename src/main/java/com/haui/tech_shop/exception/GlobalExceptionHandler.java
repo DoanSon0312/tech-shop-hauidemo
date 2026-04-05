@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         }
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("error/500");
+        mav.setViewName("user/404");
         mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         mav.addObject("errorMessage", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
         return mav;
@@ -87,4 +87,16 @@ public class GlobalExceptionHandler {
 
         return true;
     }
+
+    @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+    public ModelAndView handleMissingParam(HttpServletRequest request,
+                                           org.springframework.web.bind.MissingServletRequestParameterException ex) {
+        log.warn("[MISSING-PARAM] {} {} | {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("user/404"); // ← dùng file 404.html
+        mav.setStatus(HttpStatus.BAD_REQUEST);
+        return mav;
+    }
+
 }

@@ -5,6 +5,10 @@ import com.haui.tech_shop.entities.*;
 import com.haui.tech_shop.entities.Address;
 import com.haui.tech_shop.entities.Order;
 import com.haui.tech_shop.entities.Payment;
+import com.haui.tech_shop.enums.OrderStatus;
+import com.haui.tech_shop.services.Impl.PayOSService;
+import com.haui.tech_shop.services.Impl.SepayService;
+import com.haui.tech_shop.services.Impl.VietQRService;
 import com.haui.tech_shop.services.interfaces.*;
 import com.haui.tech_shop.services.Impl.CurrencyService;
 import com.haui.tech_shop.utils.Constant;
@@ -21,6 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import vn.payos.model.v2.paymentRequests.PaymentLinkStatus;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -39,6 +44,9 @@ public class CheckoutController {
     private final ICartDetailService cartDetailService;
     private final CurrencyService currencyService;
     private final IProductService productService;
+    private final PayOSService payOSService;
+    private final SepayService sepayService;
+    private final VietQRService vietQRService;
 
     @GetMapping("")
     public String checkout(Model model, HttpSession session, @RequestParam("selectedProducts")List<Long> selectedProducts) {
@@ -173,7 +181,20 @@ public class CheckoutController {
                 redirectUrl = "/user/checkout/paypal";
             } else if (payment.getName().equals("vnpay")) {
                 redirectUrl = "/user/checkout/vnpay";
-            } else {
+            }
+//            else if (payment.getName().equals("payos")) {
+//                // PayOS: đặt trạng thái AWAITING_PAYMENT, chưa trừ stock
+//                orderService.updateOrderStatus(order.getId(), OrderStatus.AWAITING_PAYMENT);
+//                redirectUrl = "/user/checkout/payos?orderId=" + order.getId();
+//
+//            }
+            else if (payment.getName().equals("qr_transfer")) {
+                // QR Bank Transfer via SePay: đặt trạng thái AWAITING_PAYMENT
+                orderService.updateOrderStatus(order.getId(), OrderStatus.AWAITING_PAYMENT);
+                redirectUrl = "/user/checkout/qr-payment?orderId=" + order.getId();
+            }
+
+            else {
                 // COD - chuyển thẳng đến trang thành công, thêm param paymentMethod
                 Cart cartFinal = cart;
                 for (CartDetailResponse item : cartDetailList) {
@@ -200,6 +221,105 @@ public class CheckoutController {
             response.put("error", "An error occurred while creating order");
             return response;
         }
+    }
+
+    @GetMapping("/payos")
+    public String payosCheckout(@RequestParam("orderId") Long orderId,
+                                HttpSession session, Model model) {
+        try {
+            BigDecimal totalPrice = (BigDecimal) session.getAttribute("totalPriceToPayment");
+            long amount = totalPrice.longValue();
+            long orderCode = orderId;
+
+            String baseUrl = "http://localhost:8080";
+            String returnUrl = baseUrl + "/user/checkout/payos/success?orderId=" + orderId;
+            String cancelUrl = baseUrl + "/user/checkout/payos/cancel?orderId=" + orderId;
+
+            var checkoutData = payOSService.createPaymentLink(
+                    orderCode, amount,
+                    "DH" + orderId,
+                    returnUrl, cancelUrl
+            );
+
+            model.addAttribute("qrCode", checkoutData.getQrCode());
+            model.addAttribute("checkoutUrl", checkoutData.getCheckoutUrl());
+            model.addAttribute("orderId", orderId);
+            model.addAttribute("orderCode", orderCode);
+            model.addAttribute("amount", amount);
+            model.addAttribute("timeout", 300);
+
+            return "user/payos-checkout";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/user/checkout";
+        }
+    }
+
+    // ==================== PAYOS: Polling kiểm tra trạng thái ====================
+    @GetMapping("/payos/check-status")
+    @ResponseBody
+    public Map<String, Object> checkPayOSStatus(@RequestParam("orderCode") Long orderCode) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            var paymentInfo = payOSService.getPaymentInfo(orderCode);
+            String status = paymentInfo.getStatus().name(); // ← thêm .name()
+            result.put("status", status);
+
+            if ("CANCELLED".equals(status) || "EXPIRED".equals(status)) {
+                orderService.updateOrderStatus(orderCode, OrderStatus.CANCELLED);
+            }
+        } catch (Exception e) {
+            result.put("status", "ERROR");
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    // ==================== PAYOS: Thanh toán thành công ====================
+    @GetMapping("/payos/success")
+    public String payosSuccess(@RequestParam("orderId") Long orderId,
+                               HttpSession session) {
+        try {
+            var paymentInfo = payOSService.getPaymentInfo(orderId);
+            if (PaymentLinkStatus.PAID == paymentInfo.getStatus()) {
+                // Trừ stock + xóa cart items
+                List<CartDetailResponse> cartDetailList =
+                        (List<CartDetailResponse>) session.getAttribute("cartDetailListToBuy");
+                Long cartId = (Long) session.getAttribute("cartId");
+                Cart cart = cartService.findById(cartId);
+
+                if (cartDetailList != null && cart != null) {
+                    for (CartDetailResponse item : cartDetailList) {
+                        productService.decreaseStockQuantity(item.getProductId(), item.getQuantity());
+                        CartDetail cartDetail = cartDetailService
+                                .findByCart_IdAndProductId(cart.getId(), item.getProductId());
+                        if (cartDetail != null) {
+                            cartDetailService.delete(cartDetail);
+                        }
+                    }
+                }
+                // AWAITING_PAYMENT → PENDING
+                orderService.updateOrderStatus(orderId, OrderStatus.PENDING);
+                return "redirect:/user/order-success?orderId=" + orderId + "&paymentMethod=payos";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "redirect:/user/checkout";
+    }
+
+    // ==================== PAYOS: Hủy thanh toán ====================
+    @GetMapping("/payos/cancel")
+    public String payosCancel(@RequestParam("orderId") Long orderId) {
+        try {
+            payOSService.cancelPaymentLink(orderId);
+            // AWAITING_PAYMENT → CANCELLED
+            orderService.updateOrderStatus(orderId, OrderStatus.CANCELLED);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "redirect:/user/cart";
     }
 
     @GetMapping("/paypal")
@@ -328,6 +448,95 @@ public class CheckoutController {
             return ResponseEntity.badRequest().body("Error");
         }
 
+    }
+
+    // ==================== QR SEPAY: Trang hiển thị QR ====================
+    @GetMapping("/qr-payment")
+    public String qrPaymentPage(@RequestParam("orderId") Long orderId,
+                                HttpSession session, Model model) {
+        BigDecimal totalPrice = (BigDecimal) session.getAttribute("totalPriceToPayment");
+        long amount = totalPrice.longValue();
+
+        // Nội dung chuyển khoản: DH + orderId (unique, dùng để SePay match)
+        String transferContent = "DH" + orderId;
+
+        // Generate VietQR URL
+        String qrUrl = vietQRService.generateQRUrl(amount, transferContent);
+
+        model.addAttribute("qrUrl", qrUrl);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("amount", amount);
+        model.addAttribute("transferContent", transferContent);
+        model.addAttribute("timeout", 300); // 5 phút
+        model.addAttribute("bankId", vietQRService.getBankId());
+        model.addAttribute("accountNo", vietQRService.getAccountNo());
+        model.addAttribute("accountName", vietQRService.getAccountName());
+
+        return "user/qr-payment";
+    }
+
+    // ==================== QR SEPAY: Polling kiểm tra thanh toán ====================
+    @GetMapping("/qr-payment/check-status")
+    @ResponseBody
+    public Map<String, Object> checkQRPaymentStatus(@RequestParam("orderId") Long orderId, @RequestParam("amount") Long amount) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String transferContent = "DH" + orderId;
+            boolean paid = sepayService.checkPaymentReceived(transferContent, amount);
+
+            if (paid) {
+                result.put("status", "PAID");
+            } else {
+                result.put("status", "PENDING");
+            }
+        } catch (Exception e) {
+            result.put("status", "ERROR");
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    // ==================== QR SEPAY: Xác nhận thành công ====================
+    @GetMapping("/qr-payment/success")
+    public String qrPaymentSuccess(@RequestParam("orderId") Long orderId,
+                                   HttpSession session) {
+        try {
+            List<CartDetailResponse> cartDetailList =
+                    (List<CartDetailResponse>) session.getAttribute("cartDetailListToBuy");
+            Long cartId = (Long) session.getAttribute("cartId");
+            Cart cart = cartService.findById(cartId);
+
+            if (cartDetailList != null && cart != null) {
+                for (CartDetailResponse item : cartDetailList) {
+                    productService.decreaseStockQuantity(item.getProductId(), item.getQuantity());
+                    CartDetail cartDetail = cartDetailService
+                            .findByCart_IdAndProductId(cart.getId(), item.getProductId());
+                    if (cartDetail != null) {
+                        cartDetailService.delete(cartDetail);
+                    }
+                }
+            }
+            orderService.updateOrderStatus(orderId, OrderStatus.PENDING);
+            return "redirect:/user/order-success?orderId=" + orderId + "&paymentMethod=qr_transfer";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/user/checkout";
+        }
+    }
+
+    // ==================== QR SEPAY: Hết thời gian / Hủy ====================
+    @PostMapping("/qr-payment/cancel")
+    @ResponseBody
+    public Map<String, Object> qrPaymentCancel(@RequestParam("orderId") Long orderId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            orderService.updateOrderStatus(orderId, OrderStatus.CANCELLED);
+            result.put("status", "CANCELLED");
+        } catch (Exception e) {
+            result.put("status", "ERROR");
+            result.put("message", e.getMessage());
+        }
+        return result;
     }
 
 }

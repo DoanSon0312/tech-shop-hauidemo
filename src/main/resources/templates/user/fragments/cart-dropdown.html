@@ -38,7 +38,7 @@
         <div class="cart-footer">
             <h3 class="cart-subtotal">
                 <span class="subtotal-title" th:text="#{cart.subtotal}">Subtotal:</span>
-                <span class="subtotal-amount" th:if="${cart.id != null}"
+                <span class="subtotal-amount" th:if="${cart != null && cart.id != null}"
                       th:text="${totalPriceOfCart.totalPrice}"></span>
             </h3>
             <div class="group-btn">

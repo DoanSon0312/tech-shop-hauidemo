@@ -118,6 +118,14 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public void updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
+    @Override
     public void deleteAll() {
         orderRepository.deleteAll();
     }

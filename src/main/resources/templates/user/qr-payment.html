@@ -1,0 +1,324 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+  <title>QR Payment</title>
+  <div th:insert="~{user/fragments/head::head}"></div>
+  <style>
+    .qr-payment-container {
+        max-width: 500px;
+        margin: 40px auto;
+        text-align: center;
+        padding: 30px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .qr-payment-container h2 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+    .qr-image {
+        width: 300px;
+        height: 300px;
+        margin: 20px auto;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+    }
+    .bank-info {
+        text-align: left;
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        font-size: 14px;
+    }
+    .bank-info p {
+        margin: 5px 0;
+    }
+    .bank-info strong {
+        display: inline-block;
+        width: 140px;
+    }
+    .countdown-timer {
+        font-size: 28px;
+        font-weight: bold;
+        color: #e74c3c;
+        margin: 15px 0;
+    }
+    .countdown-timer.warning {
+        animation: blink 1s infinite;
+    }
+    @keyframes blink {
+        50% { opacity: 0.5; }
+    }
+    .status-message {
+        font-size: 16px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        display: none;
+    }
+    .status-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .status-failed {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+    .cancel-btn {
+        margin-top: 15px;
+        padding: 10px 30px;
+        background: #6c757d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .cancel-btn:hover {
+        background: #5a6268;
+    }
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.9);
+        z-index: 10;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        border-radius: 12px;
+    }
+    .overlay.active {
+        display: flex;
+    }
+    .overlay .icon {
+        font-size: 60px;
+        margin-bottom: 15px;
+    }
+    .overlay .icon.success { color: #28a745; }
+    .overlay .icon.failed { color: #dc3545; }
+    .qr-wrapper {
+        position: relative;
+    }
+  </style>
+</head>
+
+<body class="sticky-header">
+<div th:insert="~{user/fragments/header::header}"></div>
+
+<main class="main-wrapper">
+  <div class="axil-checkout-area axil-section-gap">
+    <div class="container">
+      <div class="qr-payment-container qr-wrapper">
+
+        <!-- Overlay for success/fail -->
+        <div class="overlay" id="resultOverlay">
+          <div class="icon" id="resultIcon"></div>
+          <h3 id="resultTitle"></h3>
+          <p id="resultMessage"></p>
+        </div>
+
+        <h2>QR Bank Transfer</h2>
+        <p style="color: #666;">Scan the QR code below to complete your payment</p>
+
+        <!-- QR Code Image -->
+        <div>
+          <img th:src="${qrUrl}" alt="QR Code" class="qr-image" id="qrImage">
+        </div>
+
+        <!-- Bank Info -->
+        <div class="bank-info">
+          <p><strong>Bank:</strong> <span th:text="${bankId}"></span></p>
+          <p><strong>Account Number:</strong> <span th:text="${accountNo}"></span></p>
+          <p><strong>Account Name:</strong> <span th:text="${accountName}"></span></p>
+          <p><strong>Amount:</strong> <span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}" style="color: #e74c3c; font-weight: bold;"></span> VND</p>
+          <p><strong>Transfer Content:</strong> <span th:text="${transferContent}" style="color: #007bff; font-weight: bold;"></span></p>
+        </div>
+
+        <!-- Countdown -->
+        <div>
+          <p style="margin-bottom: 5px; color: #666;">Time remaining:</p>
+          <div class="countdown-timer" id="countdown"></div>
+        </div>
+
+        <!-- Status -->
+        <div class="status-message status-pending" id="statusPending" style="display: block;">
+          <span class="spinner"></span> Waiting for payment...
+        </div>
+        <div class="status-message status-success" id="statusSuccess">
+          ✅ Payment successful! Redirecting...
+        </div>
+        <div class="status-message status-failed" id="statusFailed">
+          ❌ Payment failed or expired.
+        </div>
+
+        <!-- Cancel Button -->
+        <button class="cancel-btn" id="cancelBtn" onclick="cancelPayment()">Cancel Payment</button>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script th:inline="javascript">
+  const orderId = /*[[${orderId}]]*/ 0;
+  const amount = /*[[${amount}]]*/ 0;
+  const timeoutSeconds = /*[[${timeout}]]*/ 300;
+
+  let remainingSeconds = timeoutSeconds;
+  let pollingInterval = null;
+  let countdownInterval = null;
+  let paymentCompleted = false;
+
+  // ========== COUNTDOWN ==========
+  function updateCountdown() {
+      if (remainingSeconds <= 0) {
+          clearInterval(countdownInterval);
+          clearInterval(pollingInterval);
+          if (!paymentCompleted) {
+              onPaymentTimeout();
+          }
+          return;
+      }
+
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      const display = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      document.getElementById('countdown').textContent = display;
+
+      // Warning khi còn < 60s
+      if (remainingSeconds <= 60) {
+          document.getElementById('countdown').classList.add('warning');
+      }
+
+      remainingSeconds--;
+  }
+
+  // ========== POLLING CHECK PAYMENT ==========
+  function checkPaymentStatus() {
+      if (paymentCompleted) return;
+
+      fetch('/user/checkout/qr-payment/check-status?orderId=' + orderId + '&amount=' + amount)
+          .then(res => res.json())
+          .then(data => {
+              if (data.status === 'PAID') {
+                  paymentCompleted = true;
+                  clearInterval(pollingInterval);
+                  clearInterval(countdownInterval);
+                  onPaymentSuccess();
+              }
+              // PENDING -> tiếp tục polling
+          })
+          .catch(err => {
+              console.error('Polling error:', err);
+          });
+  }
+
+  // ========== PAYMENT SUCCESS ==========
+  function onPaymentSuccess() {
+      document.getElementById('statusPending').style.display = 'none';
+      document.getElementById('statusSuccess').style.display = 'block';
+      document.getElementById('statusFailed').style.display = 'none';
+      document.getElementById('cancelBtn').style.display = 'none';
+
+      // Show overlay
+      const overlay = document.getElementById('resultOverlay');
+      document.getElementById('resultIcon').textContent = '✅';
+      document.getElementById('resultIcon').className = 'icon success';
+      document.getElementById('resultTitle').textContent = 'Payment Successful!';
+      document.getElementById('resultMessage').textContent = 'Redirecting to order confirmation...';
+      overlay.classList.add('active');
+
+      // Redirect sau 3s
+      setTimeout(function() {
+          window.location.href = '/user/checkout/qr-payment/success?orderId=' + orderId;
+      }, 3000);
+  }
+
+  // ========== PAYMENT TIMEOUT ==========
+  function onPaymentTimeout() {
+      paymentCompleted = true;
+
+      document.getElementById('statusPending').style.display = 'none';
+      document.getElementById('statusSuccess').style.display = 'none';
+      document.getElementById('statusFailed').style.display = 'block';
+      document.getElementById('cancelBtn').textContent = 'Back to Cart';
+      document.getElementById('countdown').textContent = '00:00';
+
+      // Disable QR
+      document.getElementById('qrImage').style.opacity = '0.3';
+
+      // Show overlay
+      const overlay = document.getElementById('resultOverlay');
+      document.getElementById('resultIcon').textContent = '❌';
+      document.getElementById('resultIcon').className = 'icon failed';
+      document.getElementById('resultTitle').textContent = 'Payment Expired';
+      document.getElementById('resultMessage').textContent = 'The payment time has expired. Please try again.';
+      overlay.classList.add('active');
+
+      // Cancel order on server
+      fetch('/user/checkout/qr-payment/cancel?orderId=' + orderId, { method: 'POST' });
+  }
+
+  // ========== CANCEL BUTTON ==========
+  function cancelPayment() {
+      if (paymentCompleted) {
+          window.location.href = '/user/cart';
+          return;
+      }
+
+      if (confirm('Are you sure you want to cancel this payment?')) {
+          paymentCompleted = true;
+          clearInterval(pollingInterval);
+          clearInterval(countdownInterval);
+
+          fetch('/user/checkout/qr-payment/cancel?orderId=' + orderId, { method: 'POST' })
+              .then(() => {
+                  window.location.href = '/user/cart';
+              })
+              .catch(() => {
+                  window.location.href = '/user/cart';
+              });
+      }
+  }
+
+  // ========== INIT ==========
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+
+  // Polling mỗi 3 giây
+  pollingInterval = setInterval(checkPaymentStatus, 3000);
+</script>
+
+</body>
+</html>

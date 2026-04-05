@@ -247,7 +247,7 @@ CREATE TABLE `payments` (
 
 LOCK TABLES `payments` WRITE;
 /*!40000 ALTER TABLE `payments` DISABLE KEYS */;
-INSERT INTO `payments` VALUES (1,'cod'),(2,'vnpay'),(3,'paypal'),(4,'Installment');
+INSERT INTO `payments` VALUES (1,'cod'),(2,'vnpay'),(3,'paypal'),(4,'Installment'),(5, 'payos'),(6, 'qr_transfer');
 /*!40000 ALTER TABLE `payments` ENABLE KEYS */;
 UNLOCK TABLES;
 

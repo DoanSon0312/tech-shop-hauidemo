@@ -1,0 +1,260 @@
+<!doctype html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>QR Payment</title>
+    <div th:insert="~{user/fragments/head::head}"></div>
+    <style>
+        .payos-container {
+            max-width: 500px;
+            margin: 60px auto;
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+        }
+        .qr-image {
+            width: 280px;
+            height: 280px;
+            margin: 20px auto;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+        }
+        .countdown {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 16px 0;
+        }
+        .countdown.warning {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0.4; }
+        }
+        .status-text {
+            font-size: 18px;
+            color: #555;
+            margin: 10px 0;
+        }
+        .amount-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 10px 0;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .overlay.active {
+            display: flex;
+        }
+        .overlay-content {
+            background: #fff;
+            padding: 50px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 450px;
+        }
+        .overlay-content.success {
+            border-top: 5px solid #2ecc71;
+        }
+        .overlay-content.fail {
+            border-top: 5px solid #e74c3c;
+        }
+        .overlay-content h2 {
+            margin: 20px 0 10px;
+        }
+        .overlay-content .icon {
+            font-size: 64px;
+        }
+        .overlay-content .icon.success { color: #2ecc71; }
+        .overlay-content .icon.fail { color: #e74c3c; }
+        .btn-redirect {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-redirect:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+        .btn-cancel {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 24px;
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body class="sticky-header">
+<div th:insert="~{user/fragments/header::header}"></div>
+
+<main class="main-wrapper">
+    <div class="payos-container" id="qr-container">
+        <h3>🔒 Bank Transfer Payment</h3>
+        <p class="status-text">Scan the QR code below to complete your payment</p>
+
+        <div class="amount-display">
+            <span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}"></span> VND
+        </div>
+
+        <img th:src="${qrCode}" alt="QR Code" class="qr-image" id="qr-image"/>
+
+        <div class="countdown" id="countdown"></div>
+        <p class="status-text" id="status-message">Waiting for payment...</p>
+
+        <a th:href="@{/user/checkout/payos/cancel(orderId=${orderId})}" class="btn-cancel">
+            Cancel Payment
+        </a>
+    </div>
+</main>
+
+<!-- Success Overlay -->
+<div class="overlay" id="overlay-success">
+    <div class="overlay-content success">
+        <div class="icon success">✅</div>
+        <h2>Payment Successful!</h2>
+        <p>Your order has been confirmed.</p>
+        <a id="success-redirect-btn" class="btn-redirect" href="#">
+            View Order
+        </a>
+    </div>
+</div>
+
+<!-- Failure / Timeout Overlay -->
+<div class="overlay" id="overlay-fail">
+    <div class="overlay-content fail">
+        <div class="icon fail">❌</div>
+        <h2 id="fail-title">Payment Failed!</h2>
+        <p id="fail-message">The transaction has expired or been cancelled.</p>
+        <a th:href="@{/user/checkout}" class="btn-redirect">
+            Back to Checkout
+        </a>
+    </div>
+</div>
+
+<div th:insert="~{/user/fragments/footer::footer}"></div>
+<div th:insert="~{/user/fragments/script::script}"></div>
+
+<script th:inline="javascript">
+    const orderId = /*[[${orderId}]]*/ 0;
+    const orderCode = /*[[${orderCode}]]*/ 0;
+    const timeoutSeconds = /*[[${timeout}]]*/ 300;
+
+    let remainingTime = timeoutSeconds;
+    let pollingInterval = null;
+    let countdownInterval = null;
+    let isFinished = false;
+
+    function startCountdown() {
+        const countdownEl = document.getElementById('countdown');
+
+        countdownInterval = setInterval(function() {
+            if (isFinished) {
+                clearInterval(countdownInterval);
+                return;
+            }
+
+            remainingTime--;
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            countdownEl.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+
+            if (remainingTime <= 60) {
+                countdownEl.classList.add('warning');
+            }
+
+            if (remainingTime <= 0) {
+                clearInterval(countdownInterval);
+                clearInterval(pollingInterval);
+                handleTimeout();
+            }
+        }, 1000);
+    }
+
+    function startPolling() {
+        pollingInterval = setInterval(function() {
+            if (isFinished) {
+                clearInterval(pollingInterval);
+                return;
+            }
+
+            fetch('/user/checkout/payos/check-status?orderCode=' + orderCode)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'PAID') {
+                        isFinished = true;
+                        clearInterval(pollingInterval);
+                        clearInterval(countdownInterval);
+                        handleSuccess();
+                    } else if (data.status === 'CANCELLED' || data.status === 'EXPIRED') {
+                        isFinished = true;
+                        clearInterval(pollingInterval);
+                        clearInterval(countdownInterval);
+                        handleFail('Payment Cancelled', 'The transaction has been cancelled by the system.');
+                    }
+                })
+                .catch(err => console.error('Polling error:', err));
+        }, 3000);
+    }
+
+    function handleSuccess() {
+        document.getElementById('status-message').textContent = '✅ Payment Successful!';
+        document.getElementById('qr-image').style.opacity = '0.3';
+
+        document.getElementById('overlay-success').classList.add('active');
+        document.getElementById('success-redirect-btn').href =
+            '/user/order-success?orderId=' + orderId + '&paymentMethod=payos';
+
+        setTimeout(function() {
+            window.location.href = '/user/order-success?orderId=' + orderId + '&paymentMethod=payos';
+        }, 3000);
+    }
+
+    function handleTimeout() {
+        isFinished = true;
+        handleFail('Payment Timeout!', 'The QR code has expired. Please try again.');
+
+        fetch('/user/checkout/payos/cancel?orderId=' + orderId, { method: 'GET' });
+    }
+
+    function handleFail(title, message) {
+        document.getElementById('status-message').textContent = '❌ ' + title;
+        document.getElementById('qr-image').style.opacity = '0.2';
+        document.getElementById('countdown').textContent = '00:00';
+
+        document.getElementById('fail-title').textContent = title;
+        document.getElementById('fail-message').textContent = message;
+        document.getElementById('overlay-fail').classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        startCountdown();
+        startPolling();
+    });
+</script>
+
+</body>
+</html>
