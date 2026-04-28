@@ -227,7 +227,7 @@ public class CheckoutController {
             long amount = totalPrice.longValue();
             long orderCode = orderId;
 
-            String baseUrl = "http://localhost:8080";
+            String baseUrl = "https://tech-shop-hauidemo.onrender.com";
             String returnUrl = baseUrl + "/user/checkout/payos/success?orderId=" + orderId;
             String cancelUrl = baseUrl + "/user/checkout/payos/cancel?orderId=" + orderId;
 
