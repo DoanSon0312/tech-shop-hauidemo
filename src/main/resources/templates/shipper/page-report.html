@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head th:insert="~{/shipper/fragments/head::head}">
+<head th:insert="~{shipper/fragments/head::head}">
   <body class="  ">
    <!-- loader Start -->
    <div id="loading">
@@ -11,9 +11,9 @@
 <!-- Wrapper Start -->
 <div class="wrapper">
 
-    <div th:insert="~{/shipper/fragments/sidebar::sidebar}"></div>
-    <div th:insert="~{/shipper/fragments/navbar::navbar}"></div>
-    <div th:insert="~{/shipper/fragments/header::header}"></div>
+    <div th:insert="~{shipper/fragments/sidebar::sidebar}"></div>
+    <div th:insert="~{shipper/fragments/navbar::navbar}"></div>
+    <div th:insert="~{shipper/fragments/header::header}"></div>
     <div class="content-page">
         <div class="container-fluid">
             <div class="row">
@@ -152,7 +152,7 @@
 </div>
 <!-- Wrapper End-->
     <!-- Backend Bundle JavaScript -->
-   <div th:insert="~{/shipper/fragments/footer::footer}"></div>
-   <div th:insert="~{/shipper/fragments/script::script}"></div>
+   <div th:insert="~{shipper/fragments/footer::footer}"></div>
+   <div th:insert="~{shipper/fragments/script::script}"></div>
   </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title th:text="${paymentMethod == 'cod' ? 'Order Successful' : 'Payment Successful'}">Payment Successful</title>
-    <div th:insert="~{/user/fragments/head::head}"></div>
+    <div th:insert="~{user/fragments/head::head}"></div>
     <style>
         .success-container {
             background: white;
