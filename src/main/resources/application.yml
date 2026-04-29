@@ -4,8 +4,8 @@ SERVER_PORT: 8080
 # port of smtp protocol
 EMAIL_HOST: smtp.gmail.com
 EMAIL_PORT: 587
-EMAIL_ID: soncoi9atd@gmail.com
-EMAIL_PASSWORD: ulcowwoxoctvgwic
+EMAIL_ID: ${EMAIL_ID}
+EMAIL_PASSWORD: ${EMAIL_PASSWORD}
 VERIFY_EMAIL_HOST: ${APP_URL}
 
 server:
@@ -69,7 +69,7 @@ spring:
           charset: UTF-8
         smtp:
           writetimeout: 10000
-          connectiontimeout: 10000
+          connectinoscript: 10000
           timeout: 10000
           auth: true
           starttls:
@@ -83,55 +83,43 @@ main:
 
 paypal:
   client:
-    id: AXBTSV0r2LIggE6o5iTeP9lcOXCHLCcLt6Gq4HmZTgZsFnmogPAIjTXF-usf9in5yEHcsPEjrFAWP_V6
-    secret: EJk9cXkWkiZ-5f5J61KQxnj3lb1vrfzGWKjPl7cZ-fuj7vdNiaxqWmzuhK9kQ8noD4CT_iKoBW6G0GpC
+    id: ${PAYPAL_CLIENT_ID}
+    secret: ${PAYPAL_CLIENT_SECRET}
   mode: sandbox
   return-url: ${APP_URL}/user/checkout/paypal/success
   cancel-url: ${APP_URL}/user/checkout/paypal/cancel
 
 jwt:
-  signedKey: "zsB+WqpHBR2Lorx/E7adcBsor1NwJQswYtB/bnFZdfThjCXxwyDGlpRtI1dcTPHE"
+  signedKey: ${JWT_SIGNED_KEY}
 
 currency:
   api:
-    url: "https://v6.exchangerate-api.com/v6/35e55f125051d62ab8e392f6/latest/VND"
+    url: "https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/latest/VND"
 
 gemini:
   api:
-    key: "AIzaSyDZ3g3GLrgwpDUp8IBBx1eRQPq-KweGptc"
+    key: ${GEMINI_API_KEY}
     url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 cloudinary:
-  cloud-name: "djxfn3ykc"
-  api-key: "544649756451829"
-  api-secret: "x35UndH2C9fuFqKn2cmKfDH5k4I"
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
 
-# Slack & Seq config
 slack:
   webhook:
-    url: "https://hooks.slack.com/services/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"
-
-#seq:
-#  server:
-#    url: "http://localhost:5341"  # URL giao diện web Seq
-#  api:
-#    url: "http://localhost:5341"  # URL API Seq
+    url: ${SLACK_WEBHOOK_URL}
 
 betterstack:
-  source-token: "H4cSrAktzBaTiaPuZstCNXKZ"
-  dashboard-url: "https://telemetry.betterstack.com/team/t519732/tail?s=2323837"
-
-payos:
-  client-id: YOUR_CLIENT_ID
-  api-key: YOUR_API_KEY
-  checksum-key: YOUR_CHECKSUM_KEY
+  source-token: ${BETTERSTACK_SOURCE_TOKEN}
+  dashboard-url: ${BETTERSTACK_DASHBOARD_URL}
 
 sepay:
-  api-key: "QWPL1DT8E9MQBB3OQM6GRSJ4ONUAGRML2DMTVFFNKU6R0ZYK7HKNTCHPFWPIXJIH"  # Lấy từ https://my.sepay.vn -> API Key
-  bank-account-number: "088832789999"
-  bank-brand: "MB"
+  api-key: ${SEPAY_API_KEY}
+  bank-account-number: ${SEPAY_BANK_ACCOUNT}
+  bank-brand: ${SEPAY_BANK_BRAND}
 
 vietqr:
-  bank-id: MB
-  account-no: "088832789999"
-  account-name: "DNTSON"
+  bank-id: ${VIETQR_BANK_ID}
+  account-no: ${VIETQR_ACCOUNT_NO}
+  account-name: ${VIETQR_ACCOUNT_NAME}
