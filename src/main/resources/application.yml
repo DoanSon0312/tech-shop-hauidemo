@@ -115,10 +115,10 @@ betterstack:
   dashboard-url: ${BETTERSTACK_DASHBOARD_URL}
 
 payos:
-  client-id: ${PAYOS_CLIENT_ID}
-  api-key: ${PAYOS_API_KEY}
-  checksum-key: ${PAYOS_CHECKSUM_KEY}
-  
+  client-id: ${PAYOS_CLIENT_ID:placeholder}
+  api-key: ${PAYOS_API_KEY:placeholder}
+  checksum-key: ${PAYOS_CHECKSUM_KEY:placeholder}
+ 
 sepay:
   api-key: ${SEPAY_API_KEY}
   bank-account-number: ${SEPAY_BANK_ACCOUNT}
