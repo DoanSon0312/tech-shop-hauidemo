@@ -69,7 +69,7 @@ spring:
           charset: UTF-8
         smtp:
           writetimeout: 10000
-          connectinoscript: 10000
+          connectiontimeout: 10000
           timeout: 10000
           auth: true
           starttls:
