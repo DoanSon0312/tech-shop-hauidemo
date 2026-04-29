@@ -38,69 +38,70 @@ public class ApplicationInitConfig {
 
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
-
         return args -> {
-            // Tạo các role mặc định nếu chưa tồn tại
-            String[] roleNames = {"user", "admin", "manager", "shipper"};
-            for (String roleName : roleNames) {
-                if (roleService.getRoleByName(roleName) == null) {
-                    RoleRequest role = RoleRequest.builder()
-                            .name(roleName)
-                            .build();
-                    roleService.createRole(role);
-                    log.info("Default role created: " + roleName);
+            try {
+                // Tạo các role mặc định
+                String[] roleNames = {"user", "admin", "manager", "shipper"};
+                for (String roleName : roleNames) {
+                    if (roleService.getRoleByName(roleName) == null) {
+                        RoleRequest role = RoleRequest.builder().name(roleName).build();
+                        roleService.createRole(role);
+                        log.info("Default role created: " + roleName);
+                    }
                 }
-            }
-
-            // Tạo tài khoản admin mặc định nếu chưa tồn tại
-            if(userRepository.findByUsername("admin").isEmpty()){
-                // The first, we create a address for admin
-                Address addressAdmin = Address.builder()
-                        .detailLocation("Đường 1 ngõ 1 ngách 1")
-                        .district("Quận 12")
-                        .city("TPHCM")
-                        .build();
-                addressService.save(addressAdmin);
-                Role roleAdmin = roleService.getRoleByName("admin");
-                User user = User.builder()
-                        .username("admin")
-                        .email("admin@gmail.com")
-                        .password(passwordEncoder().encode("admin"))
-                        .firstName("admin")
-                        .lastName("tech system")
-                        .addresses(Collections.singleton(addressAdmin))
-                        .isActive(true)
-                        .role(roleAdmin)
-                        .build();
-                userRepository.save(user);
-                log.info("Default admin user created with password:admin, please change it");
-            }
-
-            // Tạo 10 account mặc định để test ratings
-
-            for (int i = 0; i < 10; i++){
-                if (userRepository.findByUsername("user" + i).isEmpty()){
-                    Address address = Address.builder()
-                            .detailLocation("Đường " + i + " ngõ " + i  + " ngách " + i)
+    
+                // Tạo admin
+                if (userRepository.findByUsername("admin").isEmpty()) {
+                    Role roleAdmin = roleService.getRoleByName("admin");
+                    User user = User.builder()
+                            .username("admin")
+                            .email("admin@gmail.com")
+                            .password(passwordEncoder().encode("admin"))
+                            .firstName("admin")
+                            .lastName("tech system")
+                            .isActive(true)
+                            .role(roleAdmin)
+                            .build();
+                    User savedUser = userRepository.save(user); // ← save user TRƯỚC
+    
+                    Address addressAdmin = Address.builder()
+                            .detailLocation("Đường 1 ngõ 1 ngách 1")
                             .district("Quận 12")
                             .city("TPHCM")
+                            .user(savedUser) // ← gán user vào address
                             .build();
-                    addressService.save(address);
-
-                    Role roleUser = roleService.getRoleByName("user");
-                    User user = User.builder()
-                            .username("user" + i)
-                            .email("user" + i + "@gmail.com")
-                            .password(passwordEncoder().encode("user"))
-                            .firstName("system")
-                            .lastName("user" + i)
-                            .isActive(true)
-                            .role(roleUser)
-                            .addresses(Collections.singleton(address))
-                            .build();
-                    userRepository.save(user);
-                    log.info("Default user created with username = {} password = {}", user.getUsername(), user.getPassword());
+                    addressService.save(addressAdmin);
+                    log.info("Default admin user created");
                 }
+    
+                // Tạo 10 user test
+                for (int i = 0; i < 10; i++) {
+                    if (userRepository.findByUsername("user" + i).isEmpty()) {
+                        Role roleUser = roleService.getRoleByName("user");
+                        User user = User.builder()
+                                .username("user" + i)
+                                .email("user" + i + "@gmail.com")
+                                .password(passwordEncoder().encode("user"))
+                                .firstName("system")
+                                .lastName("user" + i)
+                                .isActive(true)
+                                .role(roleUser)
+                                .build();
+                        User savedUser = userRepository.save(user); // ← save user TRƯỚC
+    
+                        Address address = Address.builder()
+                                .detailLocation("Đường " + i + " ngõ " + i + " ngách " + i)
+                                .district("Quận 12")
+                                .city("TPHCM")
+                                .user(savedUser) // ← gán user vào address
+                                .build();
+                        addressService.save(address);
+                        log.info("Default user created: {}", user.getUsername());
+                    }
+                }
+    
+            } catch (Exception e) {
+                log.error("ApplicationInitConfig failed: ", e);
             }
         };
     }
