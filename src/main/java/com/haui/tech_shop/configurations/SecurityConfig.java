@@ -13,29 +13,33 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-//@EnableWebSecurity
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINTS = {"/register", "/user/home", "/api/chat", "/user/contact", "/user/about-us", "/forgot-password", "/test/**", "/verify-account",
-        "/user/products/**"
-    };
 
     CustomUserDetailsServiceImpl customUserDetailsService;
     CustomAuthFailureHandler customAuthFailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // Tránh lỗi redirect loop
                 .requestCache(requestCache -> requestCache.disable())
+
                 .authorizeHttpRequests(request -> request
+                        // Static resources
                         .requestMatchers("/user/assets/**").permitAll()
                         .requestMatchers("/user/customize/**").permitAll()
                         .requestMatchers("/admin/assets/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+
+                        // Public pages
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/register").permitAll()
-                        .requestMatchers("/user/home").permitAll()        // ← tách ra, đặt TRƯỚC /user/**
+                        .requestMatchers("/user/home").permitAll()
                         .requestMatchers("/api/chat").permitAll()
                         .requestMatchers("/user/contact").permitAll()
                         .requestMatchers("/user/about-us").permitAll()
@@ -43,22 +47,36 @@ public class SecurityConfig {
                         .requestMatchers("/test/**").permitAll()
                         .requestMatchers("/verify-account").permitAll()
                         .requestMatchers("/user/products/**").permitAll()
+
+                        // Role pages
                         .requestMatchers("/user/**").hasAnyRole("ADMIN", "USER", "MANAGER", "SHIPPER")
                         .requestMatchers("/manager/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/shipper/**").hasAnyRole("ADMIN", "SHIPPER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
-                .formLogin(form ->
-                    form.loginPage("/login")
-                            .successHandler(new CustomizeSuccessHandler())
-                            .failureHandler(customAuthFailureHandler)
-                            .permitAll()
+
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .successHandler(new CustomizeSuccessHandler())
+                        .failureHandler(customAuthFailureHandler)
+                        .permitAll()
                 )
+
+                // Ghi nhớ đăng nhập 30 ngày
+                .rememberMe(remember -> remember
+                        .key("tech-shop-remember-me-key")
+                        .userDetailsService(customUserDetailsService)
+                        .tokenValiditySeconds(60 * 60 * 24 * 30)
+                        .rememberMeCookieName("TECH_SHOP_REMEMBER_ME")
+                        .alwaysRemember(true)
+                )
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "TECH_SHOP_REMEMBER_ME")
                         .logoutSuccessUrl("/user/home?logout=true")
                         .permitAll()
                 );
@@ -70,7 +88,9 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
+
         authenticationManagerBuilder.userDetailsService(customUserDetailsService);
+
         return authenticationManagerBuilder.build();
     }
 }
