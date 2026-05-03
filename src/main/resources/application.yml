@@ -2,7 +2,7 @@
 SERVER_PORT: 8080
 
 # port of smtp protocol
-EMAIL_HOST: smtp.gmail.com
+EMAIL_HOST: smtp-relay.brevo.com
 EMAIL_PORT: 587
 EMAIL_ID: ${EMAIL_ID}
 EMAIL_PASSWORD: ${EMAIL_PASSWORD}
