@@ -17,19 +17,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-    @Value("${brevo.api-key}")
+    @Value("${resend.api-key}")
     private String apiKey;
 
     @Value("${spring.mail.verify.host}")
     private String host;
 
-    @Value("${brevo.sender-email}") 
-    private String senderEmail;
+    @Value("${resend.from-email}")
+    private String fromEmail;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final WebClient webClient = WebClient.create("https://api.brevo.com/v3/smtp/email");
+    private final WebClient webClient = WebClient.create("https://api.resend.com/emails");
 
     @Override
     public void sendEmailToVerifyAccount(String name, String to, String token) {
@@ -37,10 +37,10 @@ public class EmailServiceImpl implements EmailService {
             String content = EmailUtil.getEmailMessage(name, host, token)
                     .replace("\n", "<br>");
 
-            sendEmail(to, "New User Account Verification", content);
+            sendEmail(to, "Verify your account", content);
 
         } catch (Exception e) {
-            throw new RuntimeException("Has error occurred while sending email to verify account\n\n" + e.getMessage());
+            throw new RuntimeException("Send email failed\n\n" + e.getMessage());
         }
     }
 
@@ -48,35 +48,32 @@ public class EmailServiceImpl implements EmailService {
     public void sendEmailToReactivePassword(String email) {
         try {
             User existingUser = userRepository.findByEmailIgnoreCase(email)
-                    .orElseThrow(() -> new RuntimeException("User not found at send email get password"));
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
             String newPassword = EmailUtil.generateRandomPassword();
 
-            String content = "New your password is: " + newPassword
-                    + "<br><br>The support by [Đ.N.T.Sơn]";
+            String content = "New your password is: " + newPassword +
+                    "<br><br>The support by [Đ.N.T.Sơn]";
 
-            sendEmail(existingUser.getEmail(), "Provide New Password", content);
+            sendEmail(existingUser.getEmail(), "Reset Password", content);
 
             existingUser.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(existingUser);
 
         } catch (Exception e) {
-            throw new RuntimeException("Has error occurred while sending email to get password\n\n" + e.getMessage());
+            throw new RuntimeException("Send email failed\n\n" + e.getMessage());
         }
     }
 
     private void sendEmail(String to, String subject, String htmlContent) {
         webClient.post()
-                .header("api-key", apiKey)
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .bodyValue(Map.of(
-                        "sender", Map.of(
-                                "email", senderEmail,
-                                "name", "Tech Shop"
-                        ),
-                        "to", List.of(Map.of("email", to)),
+                        "from", fromEmail,
+                        "to", List.of(to),
                         "subject", subject,
-                        "htmlContent", htmlContent
+                        "html", htmlContent
                 ))
                 .retrieve()
                 .bodyToMono(String.class)
