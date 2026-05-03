@@ -140,3 +140,4 @@ vietqr:
 
 brevo:
   api-key: ${BREVO_API_KEY}
+  sender-email: ${BREVO_SENDER_EMAIL}
