@@ -138,6 +138,5 @@ vietqr:
   account-no: ${VIETQR_ACCOUNT_NO}
   account-name: ${VIETQR_ACCOUNT_NAME}
 
-brevo:
-  api-key: ${BREVO_API_KEY}
-  sender-email: ${BREVO_SENDER_EMAIL}
+resend:
+  api-key: ${RESEND_API_KEY}
