@@ -23,8 +23,8 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.verify.host}")
     private String host;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    @Value("${brevo.sender-email}") 
+    private String senderEmail;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -71,7 +71,7 @@ public class EmailServiceImpl implements EmailService {
                 .header("Content-Type", "application/json")
                 .bodyValue(Map.of(
                         "sender", Map.of(
-                                "email", fromEmail,
+                                "email", senderEmail,
                                 "name", "Tech Shop"
                         ),
                         "to", List.of(Map.of("email", to)),
