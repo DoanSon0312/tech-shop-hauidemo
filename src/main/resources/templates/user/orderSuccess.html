@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title th:text="${paymentMethod == 'cod' ? 'Order Successful' : 'Payment Successful'}">Payment Successful</title>
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{/user/assets/images/favicon_techshop.png}"/>
     <div th:insert="~{user/fragments/head::head}"></div>
     <style>
         .success-container {
