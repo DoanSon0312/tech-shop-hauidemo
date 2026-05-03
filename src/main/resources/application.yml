@@ -137,3 +137,6 @@ vietqr:
   bank-id: ${VIETQR_BANK_ID}
   account-no: ${VIETQR_ACCOUNT_NO}
   account-name: ${VIETQR_ACCOUNT_NAME}
+
+brevo:
+  api-key: ${BREVO_API_KEY}
