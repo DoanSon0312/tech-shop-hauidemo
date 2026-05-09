@@ -408,7 +408,7 @@ public class GeminiService {
 
     // ============ CORE METHODS ============
     private String callGeminiAPIWithHistory(String currentPrompt, ConversationContext context) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + config.getApiKey();
+        String url = config.getUrl() + "?key=" + config.getApiKey();
 
         List<Map<String, Object>> contents = new ArrayList<>();
         contents.add(Map.of("role", "user", "parts", List.of(Map.of("text", SYSTEM_INSTRUCTION))));

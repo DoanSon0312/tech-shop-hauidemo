@@ -343,8 +343,7 @@ public class ChatAdminService {
      * Gọi Gemini API
      */
     private String callGeminiAPI(String prompt, ConversationContext context) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
-                + config.getApiKey();
+        String url = config.getUrl() + "?key=" + config.getApiKey();
 
         List<Map<String, Object>> contents = new ArrayList<>();
         contents.add(Map.of("role", "user", "parts", List.of(Map.of("text", prompt))));

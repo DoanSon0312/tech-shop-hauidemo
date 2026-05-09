@@ -1,11 +1,13 @@
 package com.haui.tech_shop.services.Impl;
 
+import com.haui.tech_shop.chatbox.GeminiConfig;
 import com.haui.tech_shop.dtos.requests.ProductRequest;
 import com.haui.tech_shop.services.interfaces.IOCRService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -19,18 +21,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class OCRServiceImpl implements IOCRService {
 
-    @Value("${gemini.api.key}")
-    private String geminiApiKey;
-
+    private final GeminiConfig config;
     private final RestTemplate restTemplate;
     private final Gson gson;
-
-    public OCRServiceImpl() {
-        this.restTemplate = new RestTemplate();
-        this.gson = new Gson();
-    }
 
     @Override
     public String extractTextFromImage(MultipartFile file) throws IOException {
@@ -100,7 +96,7 @@ public class OCRServiceImpl implements IOCRService {
             requestBody.add("generationConfig", generationConfig);
 
             // Build URL
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
+            String url = config.getUrl() + "?key=" + config.getApiKey();
 
             // Make API call
             HttpHeaders headers = new HttpHeaders();
